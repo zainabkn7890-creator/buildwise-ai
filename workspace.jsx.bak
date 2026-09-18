@@ -1,0 +1,793 @@
+import React, { Component, useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom/client';
+import Header from './components/Header.jsx';
+import LeftSidebar from './components/LeftSidebar.jsx';
+import FloorPlanCanvas from './components/FloorPlanCanvas.jsx';
+import RightSidebar from './components/RightSidebar.jsx';
+import StatusBar from './components/StatusBar.jsx';
+import ReportModal from './components/ReportModal.jsx';
+import AIGenerateModal from './components/AIGenerateModal.jsx';
+
+// Connected Wall Network Topology (Connected Building Layout)
+const INITIAL_WALLS = [
+  // Exterior Perimeter Boundary Walls (9" Load-Bearing)
+  { id: 'w_top', x1: 90, y1: 70, x2: 590, y2: 70, isExterior: true, thickness: 9, openings: [{ type: 'window', ratio: 0.15 }, { type: 'window', ratio: 0.7 }] },
+  { id: 'w_bottom', x1: 90, y1: 470, x2: 590, y2: 470, isExterior: true, thickness: 9, openings: [{ type: 'door', ratio: 0.42 }, { type: 'window', ratio: 0.15 }] },
+  { id: 'w_left', x1: 90, y1: 70, x2: 90, y2: 470, isExterior: true, thickness: 9, openings: [{ type: 'window', ratio: 0.2 }] },
+  { id: 'w_right', x1: 590, y1: 70, x2: 590, y2: 470, isExterior: true, thickness: 9, openings: [{ type: 'window', ratio: 0.2 }, { type: 'window', ratio: 0.6 }] },
+
+  // Shared Interior Partition Walls (5" Partition Walls with Embedded Door Cutouts)
+  { id: 'w_v1', x1: 230, y1: 70, x2: 230, y2: 470, isExterior: false, isVertical: true, minPos: 150, maxPos: 320, thickness: 5, openings: [{ type: 'door', ratio: 0.2 }, { type: 'door', ratio: 0.8 }] },
+  { id: 'w_v2', x1: 380, y1: 70, x2: 380, y2: 470, isExterior: false, isVertical: true, minPos: 300, maxPos: 500, thickness: 5, openings: [{ type: 'door', ratio: 0.15 }, { type: 'door', ratio: 0.85 }] },
+  { id: 'w_h1', x1: 90, y1: 220, x2: 590, y2: 220, isExterior: false, isVertical: false, minPos: 140, maxPos: 300, thickness: 5, openings: [{ type: 'door', ratio: 0.4 }] },
+  { id: 'w_h2', x1: 90, y1: 340, x2: 230, y2: 340, isExterior: false, isVertical: false, minPos: 260, maxPos: 400, thickness: 5 },
+  { id: 'w_h3', x1: 380, y1: 340, x2: 590, y2: 340, isExterior: false, isVertical: false, minPos: 260, maxPos: 420, thickness: 5, openings: [{ type: 'door', ratio: 0.2 }] },
+];
+
+// Connected Rooms (Formed by Shared Partition Walls)
+const INITIAL_ROOMS = [
+  { id: 'bed1', name: 'Bedroom 1', type: 'bedroom', x: 90, y: 70, width: 140, height: 150, areaSqFt: 210, flooring: 'Hardwood' },
+  { id: 'toi1', name: 'Toilet 1', type: 'bathroom', x: 230, y: 70, width: 150, height: 150, areaSqFt: 225, flooring: 'Vitrified Tile' },
+  { id: 'kit', name: 'Kitchen & Pantry', type: 'kitchen', x: 380, y: 70, width: 210, height: 150, areaSqFt: 315, flooring: 'Vitrified Tile' },
+  { id: 'toi2', name: 'Toilet 2', type: 'bathroom', x: 90, y: 220, width: 140, height: 120, areaSqFt: 168, flooring: 'Vitrified Tile' },
+  { id: 'stair', name: 'Staircase', type: 'staircase', x: 230, y: 220, width: 150, height: 120, areaSqFt: 180, flooring: 'Hardwood' },
+  { id: 'liv', name: 'Living & Dining', type: 'living', x: 380, y: 220, width: 210, height: 120, areaSqFt: 252, flooring: 'Italian Marble' },
+  { id: 'bed2', name: 'Bedroom 2', type: 'bedroom', x: 90, y: 340, width: 140, height: 130, areaSqFt: 182, flooring: 'Hardwood' },
+  { id: 'foy', name: 'Foyer', type: 'foyer', x: 230, y: 340, width: 150, height: 130, areaSqFt: 195, flooring: 'Italian Marble' },
+  { id: 'park', name: 'Integrated Garage', type: 'parking', x: 380, y: 340, width: 210, height: 130, areaSqFt: 273, flooring: 'Epoxy Concrete' },
+];
+
+function getCreatedProject() {
+  try { return JSON.parse(localStorage.getItem('buildwise_project_data') || 'null'); }
+  catch { return null; }
+}
+
+class WorkspaceErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error) { return { error }; }
+  componentDidCatch(error, info) { console.error('BuildWise workspace render failed.', error, info); }
+  render() {
+    if (!this.state.error) return this.props.children;
+    return (
+      <main className="workspace-recovery" role="alert">
+        <div className="workspace-recovery-card">
+          <p className="workspace-recovery-kicker">BUILDWISE AI</p>
+          <h1>We couldn’t open your workspace.</h1>
+          <p>Your project configuration is still saved. You can retry safely or return to the project wizard.</p>
+          <div className="workspace-recovery-actions">
+            <button type="button" onClick={() => window.location.reload()}>Retry workspace</button>
+            <button type="button" className="secondary" onClick={() => window.location.assign(new URL('./wizard.html', window.location.href))}>Return to wizard</button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+}
+export function BuildWiseWorkspaceApp() {
+  const [createdProject] = useState(getCreatedProject);
+  const [projectName, setProjectName] = useState(() => createdProject?.name || 'Modern Villa');
+  const [activeFloor, setActiveFloor] = useState('ground');
+  const [activeTool, setActiveTool] = useState('pointer');
+  const [gridVisible, setGridVisible] = useState(true);
+  const [gridSnap, setGridSnap] = useState(true);
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [currency, setCurrency] = useState(() => createdProject?.currency || 'INR');
+  const [mouseCoords, setMouseCoords] = useState("X: 23'-6\" | Y: 18'-9\"");
+
+  // Floors State & Walls Engine
+  const [walls, setWalls] = useState(INITIAL_WALLS);
+  const [rooms, setRooms] = useState(INITIAL_ROOMS);
+  const [selectedObjectId, setSelectedObjectId] = useState('liv');
+  const [selectedObjectType, setSelectedObjectType] = useState('room');
+  
+  const [isWallEditMode, setIsWallEditMode] = useState(false);
+  const [draggingRoom, setDraggingRoom] = useState(null);
+  const [activeResizeHandle, setActiveResizeHandle] = useState(null);
+  const [roomResizeStart, setRoomResizeStart] = useState({ x: 0, y: 0 });
+  const [roomResizeInitial, setRoomResizeInitial] = useState({ width: 0, height: 0, x: 0, y: 0 });
+  
+  const [history, setHistory] = useState([{ walls: INITIAL_WALLS, rooms: INITIAL_ROOMS }]);
+  const [historyIdx, setHistoryIdx] = useState(0);
+
+  // Modals state
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isAIGenOpen, setIsAIGenOpen] = useState(false);
+
+  // Selected Item Inspector (Supports Room, Wall, or Furniture)
+  const selectedObject = selectedObjectType === 'room' 
+    ? rooms.find(r => r.id === selectedObjectId) 
+    : (selectedObjectType === 'wall' 
+        ? walls.find(w => w.id === selectedObjectId) 
+        : (selectedObjectType === 'furniture' 
+            ? rooms.flatMap(r => r.furniture || []).find(f => f.id === selectedObjectId) 
+            : null
+          )
+      );
+  
+  // Live Editing State
+  const [isRoomEditMode, setIsRoomEditMode] = useState(true);
+  const [roomMetrics, setRoomMetrics] = useState({ width: 0, height: 0, area: 0 });
+  const [roomEditHandle, setRoomEditHandle] = useState(null);
+  const [roomResizeStart, setRoomResizeStart] = useState(null);
+  const [roomResizeInitial, setRoomResizeInitial] = useState(null);
+
+  // Real-Time Calculations
+  const plotArea = Number(createdProject?.plotArea) || 3000; // Wizard plot dimensions, with a safe editor fallback
+  const builtArea = rooms.reduce((acc, r) => acc + (r.areaSqFt || 0), 0);
+  const remainingArea = Math.max(0, plotArea - builtArea);
+  
+  const costPerSqFt = currency === 'INR' ? 3685 : 44.5;
+  const totalCost = builtArea * costPerSqFt;
+
+  // Wall Edit Mode Toggle
+  const toggleWallEditMode = () => {
+    setIsWallEditMode(!isWallEditMode);
+    setActiveTool(isWallEditMode ? 'pointer' : 'move');
+    if (isWallEditMode) {
+      setDraggingRoom(null);
+      setActiveResizeHandle(null);
+    }
+    flashSaveStatus(isWallEditMode ? 'Wall Edit Mode Enabled' : 'Wall Edit Mode Disabled');
+  };
+
+  // Material Takeoff Calculations
+  const materialStats = {
+    bricks: `${Math.round(builtArea * 15.5).toLocaleString()} Nos`,
+    cement: `${Math.round(builtArea * 0.24).toLocaleString()} Bags`,
+    steel: `${(builtArea * 0.0021).toFixed(1)} Ton`,
+    sand: `${(builtArea * 0.014).toFixed(1)} Cum`
+  };
+
+  // Wall Edit Mode State
+  const [isWallEditMode, setIsWallEditMode] = useState(false);
+  
+  // Room Editing State
+  const [draggingRoom, setDraggingRoom] = useState(null);
+  const [activeResizeHandle, setActiveResizeHandle] = useState(null);
+  const [roomResizeStart, setRoomResizeStart] = useState({ x: 0, y: 0 });
+  const [roomResizeInitial, setRoomResizeInitial] = useState({ width: 0, height: 0, x: 0, y: 0 });
+
+  // Drag Interior Wall Handler: Resizes Adjacent Rooms Dynamically
+  // Only active in WALL EDIT MODE
+  const handleUpdateWallPosition = (wallId, newPos) => {
+    if (!isWallEditMode) return;
+    
+    // Find the wall being moved
+    const targetWall = walls.find(w => w.id === wallId);
+    if (!targetWall) return;
+
+    const oldPos = targetWall.isVertical ? targetWall.x1 : targetWall.y1;
+    const isVertical = targetWall.isVertical;
+
+    // 1. Update the moved wall itself and connected endpoints of perpendicular walls
+    const updatedWalls = walls.map(w => {
+      if (w.id === wallId) {
+        return isVertical 
+          ? { ...w, x1: newPos, x2: newPos }
+          : { ...w, y1: newPos, y2: newPos };
+      }
+
+      // Update endpoints of perpendicular walls that connected to the moved wall
+      let nextW = { ...w };
+      if (isVertical) {
+        if (!w.isVertical) {
+          if (Math.abs(w.x1 - oldPos) < 10) nextW.x1 = newPos;
+          if (Math.abs(w.x2 - oldPos) < 10) nextW.x2 = newPos;
+        }
+      } else {
+        if (w.isVertical) {
+          if (Math.abs(w.y1 - oldPos) < 10) nextW.y1 = newPos;
+          if (Math.abs(w.y2 - oldPos) < 10) nextW.y2 = newPos;
+        }
+      }
+      return nextW;
+    });
+
+    setWalls(updatedWalls);
+
+    // 2. Resizes all adjacent rooms and updates their dimensions & square footage
+    const updatedRooms = rooms.map(r => {
+      let nextR = { ...r };
+      if (isVertical) {
+        // Room on the left of the wall (its right edge is close to oldPos)
+        if (Math.abs(r.x + r.width - oldPos) < 10) {
+          const newW = Math.max(20, newPos - r.x);
+          nextR.width = newW;
+          nextR.areaSqFt = Math.round((newW / 10) * (r.height / 10));
+        }
+        // Room on the right of the wall (its left edge is close to oldPos)
+        else if (Math.abs(r.x - oldPos) < 10) {
+          const rightEdge = r.x + r.width;
+          const newW = Math.max(20, rightEdge - newPos);
+          nextR.x = newPos;
+          nextR.width = newW;
+          nextR.areaSqFt = Math.round((newW / 10) * (r.height / 10));
+        }
+      } else {
+        // Room above the wall (its bottom edge is close to oldPos)
+        if (Math.abs(r.y + r.height - oldPos) < 10) {
+          const newH = Math.max(20, newPos - r.y);
+          nextR.height = newH;
+          nextR.areaSqFt = Math.round((r.width / 10) * (newH / 10));
+        }
+        // Room below the wall (its top edge is close to oldPos)
+        else if (Math.abs(r.y - oldPos) < 10) {
+          const bottomEdge = r.y + r.height;
+          const newH = Math.max(20, bottomEdge - newPos);
+          nextR.y = newPos;
+          nextR.height = newH;
+          nextR.areaSqFt = Math.round((r.width / 10) * (newH / 10));
+        }
+      }
+      return nextR;
+    });
+
+    setRooms(updatedRooms);
+    saveHistory(updatedWalls, updatedRooms);
+  };
+
+  // Independent Room Editing Handler
+  const startRoomDrag = (room, clientX, clientY) => {
+    if (activeTool !== 'pointer' && activeTool !== 'move') return;
+    
+    const svgElement = document.getElementById('blueprint-canvas');
+    if (!svgElement) return;
+    
+    const rect = svgElement.getBoundingClientRect();
+    const scale = zoomLevel / 100;
+    
+    setDraggingRoom({
+      id: room.id,
+      startX: clientX - rect.left,
+      startY: clientY - rect.top,
+      initialX: room.x,
+      initialY: room.y
+    });
+  };
+
+  const startRoomResize = (handle, room, clientX, clientY) => {
+    if (activeTool !== 'pointer' && activeTool !== 'move') return;
+    
+    const svgElement = document.getElementById('blueprint-canvas');
+    if (!svgElement) return;
+    
+    const rect = svgElement.getBoundingClientRect();
+    const scale = zoomLevel / 100;
+    
+    const handleSize = 10;
+    let handleStartX = clientX - rect.left;
+    let handleStartY = clientY - rect.top;
+    
+    let pixelX = handleStartX / scale;
+    let pixelY = handleStartY / scale;
+    
+    const clampToGrid = (val) => {
+      return Math.round(val / 10) * 10;
+    };
+    
+    setActiveResizeHandle({
+      handle,
+      roomId: room.id,
+      startClientX: clientX,
+      startClientY: clientY,
+      startPixelX: pixelX,
+      startPixelY: pixelY,
+      initialWidth: room.width,
+      initialHeight: room.height,
+      initialX: room.x,
+      initialY: room.y
+    });
+  };
+
+  const handleRoomDrag = (clientX, clientY) => {
+    if (!draggingRoom || isWallEditMode) return;
+    
+    const svgElement = document.getElementById('blueprint-canvas');
+    if (!svgElement) return;
+    
+    const rect = svgElement.getBoundingClientRect();
+    const scale = zoomLevel / 100;
+    
+    let newX = clientX - rect.left - draggingRoom.startX + draggingRoom.initialX;
+    let newY = clientY - rect.top - draggingRoom.startY + draggingRoom.initialY;
+    
+    if (gridSnap) {
+      newX = clampToGrid(newX);
+      newY = clampToGrid(newY);
+    }
+    
+    const maxX = 590 - 90;
+    const maxY = 470 - 70;
+    newX = Math.max(90, Math.min(maxX, newX));
+    newY = Math.max(70, Math.min(maxY, newY));
+    
+    const updatedRooms = rooms.map(r => {
+      if (r.id === draggingRoom.id) {
+        const updated = { ...r, x: newX, y: newY };
+        checkRoomCollision(updated);
+        return updated;
+      }
+      return r;
+    });
+    
+    setRooms(updatedRooms);
+    checkForWallIntersection(draggingRoom.id);
+  };
+
+  const handleRoomResize = (clientX, clientY) => {
+    if (!activeResizeHandle || isWallEditMode) return;
+    
+    const svgElement = document.getElementById('blueprint-canvas');
+    if (!svgElement) return;
+    
+    const rect = svgElement.getBoundingClientRect();
+    const scale = zoomLevel / 100;
+    
+    const handle = activeResizeHandle;
+    const room = rooms.find(r => r.id === handle.roomId);
+    if (!room) return;
+    
+    let dx = (clientX - handle.startClientX) / scale;
+    let dy = (clientY - handle.startClientY) / scale;
+    
+    let newWidth = handle.initialWidth;
+    let newHeight = handle.initialHeight;
+    let newX = handle.initialX;
+    let newY = handle.initialY;
+    
+    switch (handle.handle) {
+      case 'tl':
+        newX += dx;
+        newY += dy;
+        newWidth -= dx;
+        newHeight -= dy;
+        break;
+      case 'tr':
+        newY += dy;
+        newWidth -= dx;
+        newHeight -= dy;
+        break;
+      case 'bl':
+        newX += dx;
+        newWidth -= dx;
+        newY += dy;
+        newHeight -= dy;
+        break;
+      case 'br':
+        newWidth -= dx;
+        newHeight -= dy;
+        break;
+      case 'tc':
+        newY += dy;
+        newHeight -= dy;
+        break;
+      case 'bc':
+        newY += dy;
+        newHeight -= dy;
+        break;
+      case 'ml':
+        newX += dx;
+        newWidth -= dx;
+        break;
+      case 'mr':
+        newWidth -= dx;
+        break;
+    }
+    
+    if (gridSnap) {
+      newX = clampToGrid(newX);
+      newY = clampToGrid(newY);
+      newWidth = clampToGrid(newWidth);
+      newHeight = clampToGrid(newHeight);
+    }
+    
+    newWidth = Math.max(80, Math.min(400, newWidth));
+    newHeight = Math.max(80, Math.min(400, newHeight));
+    
+    const minX = 90;
+    const minY = 70;
+    const maxRoomX = 590 - 90;
+    const maxRoomY = 470 - 70;
+    
+    newX = Math.max(minX, Math.min(maxRoomX - (newWidth - 80), newX));
+    newY = Math.max(minY, Math.min(maxRoomY - (newHeight - 80), newY));
+    
+    const updatedRoom = { ...room, x: newX, y: newY, width: newWidth, height: newHeight };
+    checkRoomCollision(updatedRoom);
+    
+    const updatedRooms = rooms.map(r => {
+      if (r.id === room.id) {
+        return updatedRoom;
+      }
+      return r;
+    });
+    
+    setRooms(updatedRooms);
+  };
+
+  const checkRoomCollision = (room) => {
+    for (const otherRoom of rooms) {
+      if (otherRoom.id === room.id) continue;
+      
+      const maxDistance = 20;
+      
+      const overlapLeft = Math.max(room.x, otherRoom.x);
+      const overlapRight = Math.min(room.x + room.width, otherRoom.x + otherRoom.width);
+      const overlapTop = Math.max(room.y, otherRoom.y);
+      const overlapBottom = Math.min(room.y + room.height, otherRoom.y + otherRoom.height);
+      
+      const overlapX = overlapRight - overlapLeft;
+      const overlapY = overlapBottom - overlapTop;
+      
+      if (overlapX > 0 && overlapY > 0) {
+        if (overlapX < maxDistance && overlapY < maxDistance) {
+          alert(`Collision detected! ${room.name} cannot overlap with ${otherRoom.name}.`);
+          return false;
+        }
+      }
+    }
+    
+    return true;
+  };
+
+  const checkForWallIntersection = (roomId) => {
+    const room = rooms.find(r => r.id === roomId);
+    if (!room) return;
+    
+    const plotBoundary = {
+      minX: 90,
+      minY: 70,
+      maxX: 590,
+      maxY: 470
+    };
+    
+    const rightEdge = room.x + room.width;
+    const bottomEdge = room.y + room.height;
+    
+    if (room.x < plotBoundary.minX || rightEdge > plotBoundary.maxX ||
+        room.y < plotBoundary.minY || bottomEdge > plotBoundary.maxY) {
+      alert(`Room ${room.name} extends outside the plot boundary. Adjust position or size to fit within the plot boundaries.`);
+      return false;
+    }
+    
+    return true;
+  };
+
+  // Update Room or Furniture Properties from Inspector
+  const handleUpdateSelectedObject = (updates) => {
+    if (selectedObjectType === 'room') {
+      const room = rooms.find(r => r.id === selectedObjectId);
+      if (room) {
+        const updated = rooms.map(r => r.id === selectedObjectId ? { ...r, ...updates } : r);
+        setRooms(updated);
+        saveHistory(walls, updated);
+      }
+    } 
+    else if (selectedObjectType === 'furniture') {
+      const updatedRooms = rooms.map(r => {
+        if (r.furniture) {
+          const updatedFurniture = r.furniture.map(f => 
+            f.id === selectedObjectId ? { ...f, ...updates } : f
+          );
+          return { ...r, furniture: updatedFurniture };
+        }
+        return r;
+      });
+      setRooms(updatedRooms);
+      saveHistory(walls, updatedRooms);
+    }
+  };
+
+  // Update Furniture Drag Coordinates
+  const handleUpdateFurniture = (furnitureId, coords) => {
+    const updatedRooms = rooms.map(r => {
+      if (r.furniture) {
+        const item = r.furniture.find(f => f.id === furnitureId);
+        if (item) {
+          const updatedFurniture = r.furniture.map(f => 
+            f.id === furnitureId ? { ...f, ...coords } : f
+          );
+          return { ...r, furniture: updatedFurniture };
+        }
+      }
+      return r;
+    });
+    setRooms(updatedRooms);
+  };
+
+  // Delete Selected (Room or Furniture)
+  const handleDeleteSelected = () => {
+    if (!selectedObjectId) return;
+    if (selectedObjectType === 'room') {
+      const updated = rooms.filter(r => r.id !== selectedObjectId);
+      setRooms(updated);
+      setSelectedObjectId(null);
+      setSelectedObjectType(null);
+      saveHistory(walls, updated);
+    } 
+    else if (selectedObjectType === 'furniture') {
+      const updatedRooms = rooms.map(r => {
+        if (r.furniture) {
+          return { ...r, furniture: r.furniture.filter(f => f.id !== selectedObjectId) };
+        }
+        return r;
+      });
+      setRooms(updatedRooms);
+      setSelectedObjectId(null);
+      setSelectedObjectType(null);
+      saveHistory(walls, updatedRooms);
+    }
+  };
+
+  // Duplicate Selected (Room or Furniture)
+  const handleDuplicateSelected = () => {
+    if (!selectedObject) return;
+    if (selectedObjectType === 'room') {
+      const newId = `room_${Date.now()}`;
+      const copyRoom = {
+        ...selectedObject,
+        id: newId,
+        name: `${selectedObject.name} (Copy)`,
+        x: selectedObject.x + 30,
+        y: selectedObject.y + 30
+      };
+      const updated = [...rooms, copyRoom];
+      setRooms(updated);
+      setSelectedObjectId(newId);
+      saveHistory(walls, updated);
+    } 
+    else if (selectedObjectType === 'furniture') {
+      const newId = `furniture_${Date.now()}`;
+      const copyFurniture = {
+        ...selectedObject,
+        id: newId,
+        name: `${selectedObject.name} (Copy)`,
+        x: selectedObject.x + 20,
+        y: selectedObject.y + 20
+      };
+      
+      const updatedRooms = rooms.map(r => {
+        if (r.furniture && r.furniture.some(f => f.id === selectedObjectId)) {
+          return { ...r, furniture: [...r.furniture, copyFurniture] };
+        }
+        return r;
+      });
+      setRooms(updatedRooms);
+      setSelectedObjectId(newId);
+      saveHistory(walls, updatedRooms);
+    }
+  };
+
+  // Rotate Selected Object
+  const handleRotateSelected = () => {
+    if (!selectedObject) return;
+    const newRot = ((selectedObject.rotation || 0) + 90) % 360;
+    handleUpdateSelectedObject({ rotation: newRot });
+  };
+
+  // Drop New Room or Furniture from Sidebar
+  const handleDropNewItem = (toolId, x, y) => {
+    const isRoomType = ['room', 'bedroom', 'living', 'dining', 'kitchen', 'bathroom', 'study', 'guest', 'store', 'balcony', 'parking', 'garden'].includes(toolId);
+    
+    if (isRoomType) {
+      const newId = `${toolId}_${Date.now()}`;
+      const formattedName = toolId.charAt(0).toUpperCase() + toolId.slice(1);
+      const newRoom = {
+        id: newId,
+        name: formattedName,
+        type: toolId,
+        x: Math.max(90, Math.min(500, x)),
+        y: Math.max(70, Math.min(400, y)),
+        width: 120,
+        height: 100,
+        areaSqFt: 120,
+        flooring: 'Italian Marble',
+        furniture: []
+      };
+      const updated = [...rooms, newRoom];
+      setRooms(updated);
+      setSelectedObjectId(newId);
+      setSelectedObjectType('room');
+      saveHistory(walls, updated);
+    } else {
+      // It is a furniture or fixture asset! Drop inside the room container containing coordinates
+      const targetRoom = rooms.find(r => 
+        x >= r.x && x <= r.x + r.width &&
+        y >= r.y && y <= r.y + r.height
+      );
+
+      if (!targetRoom) return;
+
+      const newId = `${toolId}_${Date.now()}`;
+      const formattedName = toolId.charAt(0).toUpperCase() + toolId.slice(1);
+      
+      const symbolsMap = {
+        sofa: '🛋️',
+        bed: '🛏️',
+        furniture: '🪑',
+        door: '🚪',
+        window: '🪟',
+        plants: '🌿',
+        garden: '🌿',
+        electrical: '⚡',
+        plumbing: '🚰',
+        staircase: '🪜',
+        text: '🔤',
+        dimension: '📏',
+        measurement: '🧭'
+      };
+
+      const newFurniture = {
+        id: newId,
+        name: formattedName,
+        type: toolId,
+        symbol: symbolsMap[toolId] || '🪑',
+        x: x,
+        y: y,
+        rotation: 0
+      };
+
+      const updatedRooms = rooms.map(r => {
+        if (r.id === targetRoom.id) {
+          return { ...r, furniture: [...(r.furniture || []), newFurniture] };
+        }
+        return r;
+      });
+
+      setRooms(updatedRooms);
+      setSelectedObjectId(newId);
+      setSelectedObjectType('furniture');
+      saveHistory(walls, updatedRooms);
+    }
+  };
+
+  // Helper to maintain history stack
+  const saveHistory = (nextWalls, nextRooms) => {
+    const nextHist = history.slice(0, historyIdx + 1);
+    setHistory([...nextHist, { walls: nextWalls, rooms: nextRooms }]);
+    setHistoryIdx(nextHist.length);
+  };
+
+  // AI Layout Generator
+  const handleGenerateAIDraft = () => {
+    setWalls(INITIAL_WALLS);
+    setRooms(INITIAL_ROOMS);
+    setActiveFloor('ground');
+    setSelectedObjectId('liv');
+    setSelectedObjectType('room');
+    setHistory([{ walls: INITIAL_WALLS, rooms: INITIAL_ROOMS }]);
+    setHistoryIdx(0);
+  };
+
+  // Undo / Redo
+  const handleUndo = () => {
+    if (historyIdx > 0) {
+      setHistoryIdx(historyIdx - 1);
+      setWalls(history[historyIdx - 1].walls);
+      setRooms(history[historyIdx - 1].rooms);
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyIdx < history.length - 1) {
+      setHistoryIdx(historyIdx + 1);
+      setWalls(history[historyIdx + 1].walls);
+      setRooms(history[historyIdx + 1].rooms);
+    }
+  };
+
+
+  return (
+    <div class="workspace-container">
+      {/* Top Fixed Toolbar Header */}
+      <Header 
+        projectName={projectName}
+        setProjectName={setProjectName}
+        activeFloor={activeFloor}
+        setActiveFloor={setActiveFloor}
+        gridVisible={gridVisible}
+        setGridVisible={setGridVisible}
+        gridSnap={gridSnap}
+        setGridSnap={setGridSnap}
+        zoomLevel={zoomLevel}
+        setZoomLevel={setZoomLevel}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        onGenerateAI={() => setIsAIGenOpen(true)}
+        onExport={() => alert('Exporting connected floor plan to DXF/DWG/PDF format...')}
+        onOpenReport={() => setIsReportOpen(true)}
+      />
+
+      {/* Middle Workspace Body Layout */}
+      <div class="workspace-body-layout">
+        {/* Left Sidebar Toolbox */}
+        <LeftSidebar 
+          activeTool={activeTool}
+          setActiveTool={setActiveTool}
+          onGenerateAI={() => setIsAIGenOpen(true)}
+          onDeleteSelected={handleDeleteSelected}
+          onDuplicateSelected={handleDuplicateSelected}
+        />
+
+        {/* Center Connected Architectural 2D Canvas (~70% Screen Width) */}
+        <FloorPlanCanvas 
+          activeFloor={activeFloor}
+          setActiveFloor={setActiveFloor}
+          gridVisible={gridVisible}
+          gridSnap={gridSnap}
+          zoomLevel={zoomLevel}
+          setZoomLevel={setZoomLevel}
+          connectedRooms={rooms}
+          connectedWalls={walls}
+          selectedObjectId={selectedObjectId}
+          setSelectedObjectId={setSelectedObjectId}
+          selectedObjectType={selectedObjectType}
+          setSelectedObjectType={setSelectedObjectType}
+          onUpdateWallPosition={handleUpdateWallPosition}
+          onUpdateFurniture={handleUpdateFurniture}
+          onDeleteSelected={handleDeleteSelected}
+          onDuplicateSelected={handleDuplicateSelected}
+          onRotateSelected={handleRotateSelected}
+          onDropNewItem={handleDropNewItem}
+          setMouseCoords={setMouseCoords}
+          activeTool={activeTool}
+          setActiveTool={setActiveTool}
+        />
+
+        {/* Right Sidebar Property Inspector & AI Assistant */}
+        <RightSidebar 
+          selectedObject={selectedObject}
+          plotArea={plotArea}
+          builtArea={builtArea}
+          remainingArea={remainingArea}
+          totalCost={totalCost}
+          currency={currency}
+          materialStats={materialStats}
+          onUpdateSelectedObject={handleUpdateSelectedObject}
+          onDeleteSelected={handleDeleteSelected}
+          onDuplicateSelected={handleDuplicateSelected}
+          onRotateSelected={handleRotateSelected}
+        />
+      </div>
+
+      {/* Fixed Bottom Status Bar */}
+      <StatusBar 
+        activeFloor={activeFloor}
+        setActiveFloor={setActiveFloor}
+        plotArea={plotArea}
+        builtArea={builtArea}
+        remainingArea={remainingArea}
+        roomCount={rooms.length}
+        totalCost={totalCost}
+        currency={currency}
+        setCurrency={setCurrency}
+        gridVisible={gridVisible}
+        gridSnap={gridSnap}
+        zoomLevel={zoomLevel}
+        mouseCoords={mouseCoords}
+      />
+
+      {/* Modals */}
+      <ReportModal 
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        projectName={projectName}
+        totalCost={totalCost}
+        builtArea={builtArea}
+        currency={currency}
+      />
+
+      <AIGenerateModal 
+        isOpen={isAIGenOpen}
+        onClose={() => setIsAIGenOpen(false)}
+        onConfirmGenerate={handleGenerateAIDraft}
+      />
+    </div>
+  );
+}
+
+// Mount React Application
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  ReactDOM.createRoot(rootElement).render(<WorkspaceErrorBoundary><BuildWiseWorkspaceApp /></WorkspaceErrorBoundary>);
+}

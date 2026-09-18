@@ -1,0 +1,456 @@
+/* ==========================================================================
+   BUILDWISE AI - 3D VIEWER STYLES
+   Premium architectural visualization interface
+   ========================================================================== */
+
+.viewer3d-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background: var(--bg-app-dark, #04100b);
+  overflow: hidden;
+  font-family: var(--font-body, 'Inter', sans-serif);
+}
+
+/* ==========================================================================
+   1. TOP NAVIGATION BAR
+   ========================================================================== */
+.viewer3d-topbar {
+  height: 48px;
+  background: rgba(6, 22, 16, 0.95);
+  border-bottom: 1px solid var(--border-forest, #132c20);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+.viewer3d-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.viewer3d-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-forest, #132c20);
+  color: #94a3b8;
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.viewer3d-back-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--emerald-accent, #34d399);
+}
+
+.viewer3d-project-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gold-light, #f6e27a);
+  letter-spacing: 0.02em;
+}
+
+.viewer3d-topbar-center {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.v3d-tb-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #94a3b8;
+  padding: 0.3rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  white-space: nowrap;
+}
+
+.v3d-tb-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.v3d-tb-btn.active {
+  color: var(--emerald-accent, #34d399);
+  background: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.25);
+}
+
+.v3d-tb-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0 0.3rem;
+}
+
+.viewer3d-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.v3d-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-forest, #132c20);
+  color: #94a3b8;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.v3d-action-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ==========================================================================
+   2. MAIN 3D LAYOUT
+   ========================================================================== */
+.viewer3d-body {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+.viewer3d-viewport {
+  flex: 1;
+  position: relative;
+  background: #0a1820;
+  cursor: grab;
+}
+
+.viewer3d-viewport:active {
+  cursor: grabbing;
+}
+
+.viewer3d-viewport canvas {
+  display: block;
+}
+
+/* ==========================================================================
+   3. FLOOR TABS OVERLAY
+   ========================================================================== */
+.viewer3d-floor-tabs {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.25rem;
+  background: rgba(6, 22, 16, 0.85);
+  border: 1px solid var(--border-forest, #132c20);
+  border-radius: 10px;
+  padding: 0.3rem;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.v3d-floor-tab {
+  padding: 0.4rem 0.8rem;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  white-space: nowrap;
+}
+
+.v3d-floor-tab:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.v3d-floor-tab.active {
+  color: var(--gold-light, #f6e27a);
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+/* ==========================================================================
+   4. RIGHT PANEL
+   ========================================================================== */
+.viewer3d-right-panel {
+  width: 300px;
+  min-width: 300px;
+  background: rgba(7, 25, 18, 0.95);
+  border-left: 1px solid var(--border-forest, #132c20);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  backdrop-filter: blur(12px);
+  z-index: 5;
+}
+
+.v3d-panel-section {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.v3d-panel-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.65rem 0;
+}
+
+.v3d-summary-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.v3d-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.2rem 0;
+}
+
+.v3d-summary-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.v3d-summary-value {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.v3d-floor-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.v3d-floor-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gold-light, #f6e27a);
+}
+
+.v3d-floor-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--emerald-accent, #34d399);
+  background: rgba(52, 211, 153, 0.1);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.v3d-ai-summary {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.v3d-ai-summary li {
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.v3d-ai-check {
+  color: var(--emerald-accent, #34d399);
+  font-weight: 700;
+}
+
+.v3d-panel-actions {
+  margin-top: auto;
+}
+
+.v3d-regenerate-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid var(--border-gold, rgba(212, 175, 55, 0.3));
+  color: var(--gold-light, #f6e27a);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.v3d-regenerate-btn:hover {
+  background: rgba(212, 175, 55, 0.2);
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.15);
+}
+
+.v3d-panel-footer {
+  padding: 0.65rem 1rem;
+  font-size: 0.62rem;
+  color: #64748b;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  margin-top: auto;
+}
+
+/* ==========================================================================
+   5. GENERATION MODAL
+   ========================================================================== */
+.gen-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 16, 11, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(16px);
+}
+
+.gen-modal-card {
+  background: rgba(10, 34, 24, 0.9);
+  border: 1px solid var(--border-gold, rgba(212, 175, 55, 0.3));
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+.gen-modal-icon {
+  margin-bottom: 1rem;
+}
+
+.gen-modal-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.02em;
+}
+
+.gen-modal-subtitle {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin: 0 0 1.5rem 0;
+}
+
+.gen-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.gen-step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.2rem 0;
+  opacity: 0.4;
+  transition: all 0.3s ease;
+}
+
+.gen-step-item.active {
+  opacity: 1;
+}
+
+.gen-step-item.done {
+  opacity: 0.7;
+}
+
+.gen-step-indicator {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gen-step-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #64748b;
+}
+
+.gen-step-loader {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-primary, #d4af37);
+  border-top-color: transparent;
+  animation: gen-spin 0.6s linear infinite;
+}
+
+@keyframes gen-spin {
+  to { transform: rotate(360deg); }
+}
+
+.gen-step-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.gen-progress-bar-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.gen-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-primary, #d4af37), var(--gold-light, #f6e27a));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.gen-progress-pct {
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 600;
+  margin: 0;
+}

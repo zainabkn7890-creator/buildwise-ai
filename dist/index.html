@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuildWise AI | Enterprise Smart Construction Planning Platform</title>
+  <meta name="description" content="BuildWise AI is an enterprise-grade AI-powered smart construction planning platform. Design interactive floor plans, estimate costs, analyze sustainability, and generate structural reports.">
+  
+  <!-- Google Fonts: Outfit, Plus Jakarta Sans, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS Styles -->
+  <script type="module" crossorigin src="/assets/main-BOnmUpwz.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/styles-BjGFQKi-.js">
+  <link rel="modulepreload" crossorigin href="/assets/three.module-CWEo2mua.js">
+  <link rel="modulepreload" crossorigin href="/assets/lucide-CspaSc-R.js">
+  <link rel="stylesheet" crossorigin href="/assets/styles-DWhsvjQ5.css">
+</head>
+<body class="theme-forest-dark">
+
+  <!-- Architectural Background Grid Canvas/Overlay -->
+  <div class="architectural-grid-bg" id="bg-grid">
+    <div class="grid-pattern"></div>
+    <div class="grid-vignette"></div>
+    <div class="mouse-glow-spotlight" id="mouse-spotlight"></div>
+    
+    <!-- Floating Architectural Coordinate Lines -->
+    <div class="coord-line horizontal line-top"><span>Y: +42.0832 N</span></div>
+    <div class="coord-line horizontal line-bottom"><span>Y: -11.0492 S</span></div>
+    <div class="coord-line vertical line-left"><span>X: -74.0060 W</span></div>
+    <div class="coord-line vertical line-right"><span>X: +12.4921 E</span></div>
+  </div>
+
+  <!-- Command Palette Modal (Ctrl+K) -->
+  <div class="command-palette-overlay" id="cmd-palette" aria-hidden="true">
+    <div class="command-palette-modal">
+      <div class="cmd-header">
+        <i data-lucide="search" class="cmd-search-icon"></i>
+        <input type="text" id="cmd-input" placeholder="Type a command or search features... (e.g., 'New Project', 'Cost Calculator', 'Blueprint Mode')" autocomplete="off">
+        <kbd class="cmd-kbd-esc">ESC</kbd>
+      </div>
+      <div class="cmd-results" id="cmd-results">
+        <div class="cmd-group-title">Quick Actions</div>
+        <div class="cmd-item active" data-action="new-project">
+          <i data-lucide="plus-circle"></i>
+          <span>Start Project Creation Wizard</span>
+          <kbd>Enter</kbd>
+        </div>
+        <div class="cmd-item" data-action="view-dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Switch to Live Interactive Workspace</span>
+          <kbd>Ctrl+D</kbd>
+        </div>
+        <div class="cmd-item" data-action="cost-estimator">
+          <i data-lucide="calculator"></i>
+          <span>Launch Interactive AI Cost Estimator</span>
+        </div>
+        <div class="cmd-item" data-action="toggle-blueprint">
+          <i data-lucide="layers"></i>
+          <span>Toggle Architectural Blueprint Grid Mode</span>
+        </div>
+        <div class="cmd-group-title">Documentation & Support</div>
+        <div class="cmd-item" data-action="download-report">
+          <i data-lucide="file-text"></i>
+          <span>Download Structural Compliance PDF Sample</span>
+        </div>
+      </div>
+      <div class="cmd-footer">
+        <span>Use <kbd>↑</kbd> <kbd>↓</kbd> to navigate, <kbd>↵</kbd> to select</span>
+        <span>BuildWise AI v2.4 Enterprise</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar" id="main-navbar">
+    <div class="container nav-container">
+      <a href="/index.html" class="brand-logo" aria-label="BuildWise AI Homepage">
+        <div class="logo-mark">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#logo-bg-grad)" stroke="#D4AF37" stroke-width="1.5"/>
+            <path d="M8 22L16 10L24 22H8Z" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 10V22" stroke="#4ADE80" stroke-width="1.5" stroke-dasharray="2 2"/>
+            <circle cx="16" cy="10" r="2.5" fill="#F3D375"/>
+            <defs>
+              <linearGradient id="logo-bg-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#082218"/>
+                <stop offset="1" stop-color="#123D2A"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="brand-name">BuildWise</span>
+          <span class="brand-ai-badge">AI</span>
+        </div>
+      </a>
+
+      <!-- Desktop Menu Links -->
+      <nav class="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#dashboard-preview" class="nav-link">Interactive App</a>
+        <a href="#estimator" class="nav-link">Cost Calculator</a>
+        <a href="#solutions" class="nav-link">Solutions</a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="nav-actions">
+        <button class="cmd-trigger-btn" id="btn-cmd-palette" title="Open Command Palette (Ctrl+K)">
+          <i data-lucide="search"></i>
+          <span>Search...</span>
+          <kbd>⌘K</kbd>
+        </button>
+
+        <button class="nav-auth-btn" id="btn-sign-in">Sign In</button>
+
+        <a href="/wizard.html" class="btn btn-primary btn-gold">
+          <span>Start Planning</span>
+          <i data-lucide="arrow-right"></i>
+        </a>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle Navigation Menu">
+          <i data-lucide="menu"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer Menu -->
+  <div class="mobile-drawer" id="mobile-drawer">
+    <div class="drawer-header">
+      <span class="brand-name">BuildWise AI Navigation</span>
+      <button class="drawer-close" id="drawer-close"><i data-lucide="x"></i></button>
+    </div>
+    <div class="drawer-links">
+      <a href="#features" class="drawer-link">Features</a>
+      <a href="#dashboard-preview" class="drawer-link">Interactive App</a>
+      <a href="#estimator" class="drawer-link">Cost & Material Calculator</a>
+      <a href="#solutions" class="drawer-link">Enterprise Solutions</a>
+    </div>
+    <div class="drawer-footer">
+      <a href="/wizard.html" class="btn btn-primary btn-block btn-gold">Start Planning</a>
+    </div>
+  </div>
+
+  <main>
+    <!-- HERO SECTION -->
+    <section class="hero-section" id="hero">
+      <div class="container hero-container">
+        <!-- HERO LEFT SIDE -->
+        <div class="hero-left">
+          <!-- Small Badge -->
+          <div class="hero-badge">
+            <span class="badge-pulse"></span>
+            <i data-lucide="sparkles" class="badge-icon"></i>
+            <span>AI-Powered Construction Planning</span>
+            <span class="badge-chip">v2.4 Enterprise</span>
+          </div>
+
+          <!-- Large Heading -->
+          <h1 class="hero-title">
+            Plan Smarter.<br>
+            <span class="gold-gradient-text">Build Better.</span>
+          </h1>
+
+          <!-- Large Supporting Paragraph -->
+          <p class="hero-subtitle">
+            Transform architectural concepts into precise, compliance-ready construction plans. BuildWise AI combines generative 3D BIM design, instant structural physics simulation, real-time cost engineering, and carbon optimization in one unified enterprise platform.
+          </p>
+
+          <!-- Action Buttons (Primary & Secondary CTA) -->
+          <div class="hero-cta-group">
+            <a href="/wizard.html" class="btn btn-primary btn-large btn-gold-shimmer" id="hero-btn-start">
+              <i data-lucide="plus-circle"></i>
+              <span>Start New Project</span>
+            </a>
+            
+            <button class="btn btn-secondary btn-large btn-glass" id="hero-btn-dashboard">
+              <i data-lucide="layout-dashboard"></i>
+              <span>View Dashboard</span>
+            </button>
+          </div>
+
+          <!-- Small Disclaimer -->
+          <p class="hero-disclaimer">
+            <i data-lucide="info" class="disclaimer-icon"></i>
+            Planning estimates only. Not engineering-approved drawings.
+          </p>
+
+          <!-- Key Performance Highlights -->
+          <div class="hero-stats-row">
+            <div class="hero-stat-item">
+              <span class="stat-number">85%</span>
+              <span class="stat-label">Faster Planning Cycle</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="hero-stat-item">
+              <span class="stat-number">$2.4M</span>
+              <span class="stat-label">Avg. Material Cost Saved</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="hero-stat-item">
+              <span class="stat-number">99.8%</span>
+              <span class="stat-label">IBC Code Accuracy</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- HERO RIGHT SIDE (Floating Dark Card with 3D Modern House & HUD) -->
+        <div class="hero-right">
+          <div class="hero-3d-card-wrapper" id="hero-3d-card-wrapper">
+            <div class="hero-3d-card" id="hero-3d-card">
+              <!-- Card Header HUD -->
+              <div class="card-hud-header">
+                <div class="hud-status">
+                  <span class="status-dot green-dot"></span>
+                  <span class="hud-title">MODEL: LUXURY_VILLA_HYBRID_3D</span>
+                </div>
+                <div class="hud-controls-top">
+                  <span class="hud-chip"><i data-lucide="box"></i> BIM Level 3</span>
+                  <span class="hud-chip gold"><i data-lucide="shield-check"></i> IBC 2024</span>
+                </div>
+              </div>
+
+              <!-- 3D WebGL Canvas Container -->
+              <div class="canvas-container" id="canvas-container">
+                <canvas id="hero-3d-canvas"></canvas>
+
+                <!-- Interactive Overlays & Controls inside the 3D Viewer -->
+                <div class="viewer-toolbar">
+                  <div class="toolbar-group">
+                    <button class="tool-btn active" data-layer="all" title="Show All Floors">All</button>
+                    <button class="tool-btn" data-layer="l1" title="Ground Floor">L1</button>
+                    <button class="tool-btn" data-layer="l2" title="Upper Level">L2</button>
+                    <button class="tool-btn" data-layer="roof" title="Roof & Solar">Roof</button>
+                    <button class="tool-btn" data-layer="xray" title="Structural Skeleton (X-Ray Mode)"><i data-lucide="eye"></i> X-Ray</button>
+                  </div>
+                  <div class="toolbar-group">
+                    <button class="tool-btn" id="btn-toggle-wireframe" title="Toggle Blueprint Wireframe"><i data-lucide="grid"></i></button>
+                    <button class="tool-btn" id="btn-reset-view" title="Reset View Angle"><i data-lucide="rotate-ccw"></i></button>
+                  </div>
+                </div>
+
+                <!-- FUTURISTIC HUD LABELS (3D Pins with callout lines) -->
+                <div class="hud-pin-label pin-1" id="pin-1">
+                  <div class="pin-line"></div>
+                  <div class="pin-box">
+                    <div class="pin-tag">STRUCTURAL LOAD</div>
+                    <div class="pin-val">420.5 kN/m²</div>
+                    <div class="pin-sub"><i data-lucide="check"></i> Reinforced Core</div>
+                  </div>
+                </div>
+
+                <div class="hud-pin-label pin-2" id="pin-2">
+                  <div class="pin-line"></div>
+                  <div class="pin-box">
+                    <div class="pin-tag">SOLAR POTENTIAL</div>
+                    <div class="pin-val">94.8% Gold</div>
+                    <div class="pin-sub">245 kWh/day Est.</div>
+                  </div>
+                </div>
+
+                <div class="hud-pin-label pin-3" id="pin-3">
+                  <div class="pin-line"></div>
+                  <div class="pin-box">
+                    <div class="pin-tag">SUBSTRUCTURE ESTIMATE</div>
+                    <div class="pin-val">$184,500</div>
+                    <div class="pin-sub">-12.4% CO2 Concrete</div>
+                  </div>
+                </div>
+
+                <div class="hud-pin-label pin-4" id="pin-4">
+                  <div class="pin-line"></div>
+                  <div class="pin-box">
+                    <div class="pin-tag">CARBON FOOTPRINT</div>
+                    <div class="pin-val">A+ (LEED Platinum)</div>
+                    <div class="pin-sub">Biophilic Timber Frame</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card Footer HUD Telemetry -->
+              <div class="card-hud-footer">
+                <div class="telemetry-item">
+                  <span class="telemetry-label">Gross Floor Area</span>
+                  <span class="telemetry-value">4,850 sq ft</span>
+                </div>
+                <div class="telemetry-item">
+                  <span class="telemetry-label">Total Structural Cost</span>
+                  <span class="telemetry-value gold-text">$485,200</span>
+                </div>
+                <div class="telemetry-item">
+                  <span class="telemetry-label">Simulated Timeline</span>
+                  <span class="telemetry-value">7.5 Months</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRUSTED ENTERPRISE LOGOS BAR -->
+    <section class="trust-bar-section">
+      <div class="container">
+        <p class="trust-title">POWERING ENTERPRISE CONSTRUCTION & ARCHITECTURE TEAMS WORLDWIDE</p>
+        <div class="trust-logos">
+          <div class="trust-logo"><i data-lucide="box"></i> AUTODESK BIM SYNC</div>
+          <div class="trust-logo"><i data-lucide="layers"></i> TRIMBLE CONNECT</div>
+          <div class="trust-logo"><i data-lucide="building-2"></i> SKANSKA GLOBAL</div>
+          <div class="trust-logo"><i data-lucide="hard-hat"></i> TURNER CONSTRUCTION</div>
+          <div class="trust-logo"><i data-lucide="compass"></i> FOSTER + PARTNERS</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE DASHBOARD PREVIEW SECTION -->
+    <section class="dashboard-section" id="dashboard-preview">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-badge">INTERACTIVE APP PREVIEW</span>
+          <h2 class="section-title">Command Center for Modern Builders</h2>
+          <p class="section-subtitle">Switch project profiles, inspect live material recommendations, and run real-time structural audits directly inside the BuildWise AI platform interface.</p>
+        </div>
+
+        <!-- Interactive App Frame -->
+        <div class="app-window-frame">
+          <div class="app-topbar">
+            <div class="window-controls">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <div class="app-breadcrumbs">
+              <i data-lucide="folder-kanban"></i>
+              <span>Projects / </span>
+              <select id="dash-project-select" class="dash-select">
+                <option value="villa">Villa Horizon Modern Residence (Active)</option>
+                <option value="tower">Summit Commercial Tower 44 (Phase A)</option>
+                <option value="eco">Biophilic Eco-Subdivision (12 Units)</option>
+              </select>
+            </div>
+            <div class="app-actions">
+              <span class="live-sync-indicator"><i data-lucide="refresh-cw" class="spin-icon"></i> Cloud BIM Synced</span>
+              <button class="btn btn-xs btn-gold" id="btn-export-pdf"><i data-lucide="download"></i> Export PDF Report</button>
+            </div>
+          </div>
+
+          <div class="app-body">
+            <!-- Sidebar Navigation inside mock app -->
+            <div class="app-sidebar">
+              <div class="sidebar-item active"><i data-lucide="layout-dashboard"></i> Overview</div>
+              <div class="sidebar-item"><i data-lucide="box"></i> 3D Floor Plan</div>
+              <div class="sidebar-item"><i data-lucide="calculator"></i> Cost & BoQ</div>
+              <div class="sidebar-item"><i data-lucide="sparkles"></i> AI Materials</div>
+              <div class="sidebar-item"><i data-lucide="leaf"></i> Carbon Metrics</div>
+              <div class="sidebar-item"><i data-lucide="file-check"></i> Compliance</div>
+            </div>
+
+            <!-- Main Workspace Content inside mock app -->
+            <div class="app-main-workspace">
+              <!-- KPI Summary Cards Row -->
+              <div class="dash-kpi-grid">
+                <div class="kpi-card">
+                  <div class="kpi-icon gold"><i data-lucide="dollar-sign"></i></div>
+                  <div class="kpi-info">
+                    <span class="kpi-label">Estimated Total Budget</span>
+                    <span class="kpi-val" id="dash-kpi-cost">$1,420,000</span>
+                    <span class="kpi-trend positive"><i data-lucide="trending-down"></i> -8.4% vs manual estimate</span>
+                  </div>
+                </div>
+
+                <div class="kpi-card">
+                  <div class="kpi-icon green"><i data-lucide="shield-check"></i></div>
+                  <div class="kpi-info">
+                    <span class="kpi-label">Structural Safety Index</span>
+                    <span class="kpi-val" id="dash-kpi-safety">99.4%</span>
+                    <span class="kpi-sub">IBC 2024 Compliant</span>
+                  </div>
+                </div>
+
+                <div class="kpi-card">
+                  <div class="kpi-icon blue"><i data-lucide="leaf"></i></div>
+                  <div class="kpi-info">
+                    <span class="kpi-label">Embodied CO₂ Savings</span>
+                    <span class="kpi-val" id="dash-kpi-co2">84.2 Tons</span>
+                    <span class="kpi-trend positive"><i data-lucide="award"></i> LEED Gold Eligible</span>
+                  </div>
+                </div>
+
+                <div class="kpi-card">
+                  <div class="kpi-icon purple"><i data-lucide="clock"></i></div>
+                  <div class="kpi-info">
+                    <span class="kpi-label">Project Schedule</span>
+                    <span class="kpi-val" id="dash-kpi-time">8.5 Months</span>
+                    <span class="kpi-sub">Critical Path Optimized</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Interactive Material Recommendation Engine Table -->
+              <div class="dash-table-card">
+                <div class="card-table-header">
+                  <div>
+                    <h3>AI Material Optimization Engine</h3>
+                    <p>Real-time machine learning suggestions for cost reduction, supply chain availability, and carbon mitigation.</p>
+                  </div>
+                  <button class="btn btn-xs btn-outline" id="btn-refresh-materials"><i data-lucide="sparkles"></i> Re-Run AI Optimizer</button>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="dash-table">
+                    <thead>
+                      <tr>
+                        <th>Structural Element</th>
+                        <th>Standard Specification</th>
+                        <th>AI Recommended Alternative</th>
+                        <th>Cost Savings</th>
+                        <th>CO₂ Reduction</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="materials-tbody">
+                      <tr>
+                        <td class="font-weight-600"><i data-lucide="layers" class="tbl-icon"></i> Substructure Slab</td>
+                        <td>3500 PSI OPC Concrete</td>
+                        <td><span class="recommend-chip">Geopolymer Fly-Ash Concrete</span></td>
+                        <td class="text-green font-mono">-$34,200</td>
+                        <td class="text-green font-mono">-42% CO₂</td>
+                        <td><button class="btn-table-apply">Apply Suggestion</button></td>
+                      </tr>
+                      <tr>
+                        <td class="font-weight-600"><i data-lucide="frame" class="tbl-icon"></i> Upper Framing</td>
+                        <td>Standard Structural Steel</td>
+                        <td><span class="recommend-chip">Cross-Laminated Timber (CLT) Hybrid</span></td>
+                        <td class="text-green font-mono">-$68,500</td>
+                        <td class="text-green font-mono">-65% CO₂</td>
+                        <td><button class="btn-table-apply">Apply Suggestion</button></td>
+                      </tr>
+                      <tr>
+                        <td class="font-weight-600"><i data-lucide="sun" class="tbl-icon"></i> Facade & Glazing</td>
+                        <td>Double Low-E Argon Glass</td>
+                        <td><span class="recommend-chip">BIPV Photovoltaic Smart Tint Glass</span></td>
+                        <td class="text-gold font-mono">+$12,000 (ROI: 2.1 yr)</td>
+                        <td class="text-green font-mono">-88% Energy Loss</td>
+                        <td><button class="btn-table-apply applied">Applied</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CORE FEATURES SECTION -->
+    <section class="features-section" id="features">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-badge">PRODUCT CAPABILITIES</span>
+          <h2 class="section-title">Built for Precision Construction Engineering</h2>
+          <p class="section-subtitle">Everything enterprise developers and master architects need to plan, validate, and execute complex construction projects.</p>
+        </div>
+
+        <div class="features-grid">
+          <!-- Feature 1: Generative Floor Plan AI -->
+          <div class="feature-card">
+            <div class="feature-icon"><i data-lucide="pen-tool"></i></div>
+            <h3 class="feature-title">Generative Floor Plan AI</h3>
+            <p class="feature-desc">Input natural language requirements or upload hand sketches. BuildWise AI instantly renders parametric 2D CAD floor plans and 3D wireframes compliant with local zoning laws.</p>
+            <div class="feature-image-wrapper">
+              <img src="/assets/floorplan_ai.jpg" alt="Generative Floor Plan AI Render" class="feature-img">
+              <div class="feature-img-overlay">
+                <span class="img-badge"><i data-lucide="wand-2"></i> Generative CAD Engine</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 2: Instant Structural Physics Simulation -->
+          <div class="feature-card">
+            <div class="feature-icon gold-icon"><i data-lucide="activity"></i></div>
+            <h3 class="feature-title">Finite Element Structural Audits</h3>
+            <p class="feature-desc">Simulate wind shear, seismic loads, and foundation settlement stress in real time before breaking ground. Identify structural bottlenecks in early design stages.</p>
+            <div class="feature-mini-widget">
+              <div class="widget-row">
+                <span>Seismic Loading (Zone 4)</span>
+                <span class="text-green">Passed (1.45 Safety Factor)</span>
+              </div>
+              <div class="progress-bar-bg"><div class="progress-fill green-fill" style="width: 88%;"></div></div>
+              <div class="widget-row">
+                <span>Wind Deflection (140 mph)</span>
+                <span class="text-gold">Optimal (L/480)</span>
+              </div>
+              <div class="progress-bar-bg"><div class="progress-fill gold-fill" style="width: 94%;"></div></div>
+            </div>
+          </div>
+
+          <!-- Feature 3: Real-Time Cost & Material Engineering -->
+          <div class="feature-card">
+            <div class="feature-icon"><i data-lucide="calculator"></i></div>
+            <h3 class="feature-title">Automated Bill of Quantities (BoQ)</h3>
+            <p class="feature-desc">Instant itemized cost breakdowns tied to live global commodity prices. Automatically generate rebar steel tonnage, concrete volume, and labor schedules.</p>
+            <ul class="feature-list">
+              <li><i data-lucide="check-circle-2"></i> Real-time steel & lumber price index sync</li>
+              <li><i data-lucide="check-circle-2"></i> Waste factor reduction down to 1.8%</li>
+              <li><i data-lucide="check-circle-2"></i> Subcontractor bid comparison matrix</li>
+            </ul>
+          </div>
+
+          <!-- Feature 4: Sustainability & Carbon Intelligence -->
+          <div class="feature-card">
+            <div class="feature-icon green-icon"><i data-lucide="leaf"></i></div>
+            <h3 class="feature-title">Carbon & LEED Score Simulator</h3>
+            <p class="feature-desc">Quantify embodied carbon lifecycle from extraction to demolition. Receive AI material substitutions to reach net-zero operational and embodied carbon targets.</p>
+            <div class="sustainability-badge-box">
+              <div class="leed-circle">
+                <span class="circle-val">84</span>
+                <span class="circle-lbl">LEED Pts</span>
+              </div>
+              <div class="leed-info">
+                <h4>PLATINUM CERTIFICATION LEVEL</h4>
+                <p>Top 2% of sustainable building designs in 2026</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE COST & MATERIAL ESTIMATOR WIDGET SECTION -->
+    <section class="estimator-section" id="estimator">
+      <div class="container">
+        <div class="estimator-wrapper">
+          <div class="estimator-info">
+            <span class="section-badge">INTERACTIVE CALCULATOR</span>
+            <h2 class="section-title">Instant AI Cost & Material Estimator</h2>
+            <p class="section-subtitle">Adjust your project parameters below to see real-time estimated construction budget, carbon savings, and material requirements generated by BuildWise AI models.</p>
+
+            <div class="estimator-controls">
+              <!-- Slider 1: Square Footage -->
+              <div class="control-group">
+                <div class="control-header">
+                  <label for="slider-sqft">Building Footprint (Square Feet)</label>
+                  <span class="val-display" id="val-sqft">4,500 sq ft</span>
+                </div>
+                <input type="range" id="slider-sqft" min="1000" max="25000" step="250" value="4500" class="range-slider">
+              </div>
+
+              <!-- Selector 2: Quality Finish Tier -->
+              <div class="control-group">
+                <label>Finish & Specification Level</label>
+                <div class="tier-buttons" id="tier-buttons">
+                  <button class="tier-btn" data-tier="1.0">Standard Commercial</button>
+                  <button class="tier-btn active" data-tier="1.35">Premium High-End</button>
+                  <button class="tier-btn" data-tier="1.75">Ultra-Luxury Custom</button>
+                </div>
+              </div>
+
+              <!-- Selector 3: Structural Material Type -->
+              <div class="control-group">
+                <label for="select-material">Primary Structural Framework</label>
+                <select id="select-material" class="input-select">
+                  <option value="concrete">Fly-Ash Reinforced Concrete (Eco-Grade)</option>
+                  <option value="steel">Hybrid Steel & Composite Decking</option>
+                  <option value="timber">Cross-Laminated Mass Timber (Biophilic)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estimator Real-Time Results Card -->
+          <div class="estimator-results-card">
+            <div class="card-accent-header">
+              <i data-lucide="cpu"></i> REAL-TIME AI ESTIMATION OUTPUT
+            </div>
+
+            <div class="results-main-cost">
+              <span class="cost-lbl">Estimated Total Construction Budget</span>
+              <span class="cost-amount" id="res-total-cost">$1,215,000</span>
+              <span class="cost-per-unit" id="res-unit-cost">$270 / sq ft</span>
+            </div>
+
+            <div class="results-breakdown-grid">
+              <div class="res-item">
+                <span class="res-lbl">Structural Materials</span>
+                <span class="res-val" id="res-mat-cost">$486,000</span>
+              </div>
+              <div class="res-item">
+                <span class="res-lbl">Labor & Site Management</span>
+                <span class="res-val" id="res-labor-cost">$425,250</span>
+              </div>
+              <div class="res-item">
+                <span class="res-lbl">MEP Systems (HVAC/Solar)</span>
+                <span class="res-val" id="res-mep-cost">$182,250</span>
+              </div>
+              <div class="res-item">
+                <span class="res-lbl">Contingency & Permits</span>
+                <span class="res-val" id="res-contingency">$121,500</span>
+              </div>
+            </div>
+
+            <div class="results-ai-highlight">
+              <div class="ai-box">
+                <i data-lucide="sparkles" class="ai-box-icon"></i>
+                <div>
+                  <strong>AI Optimization Recommendation:</strong>
+                  <p id="res-ai-tip">By utilizing Fly-Ash Mass Concrete for foundations, your project saves approximately <strong>$42,800</strong> and reduces carbon emissions by <strong>36.5 tons</strong>.</p>
+                </div>
+              </div>
+            </div>
+
+            <a href="/wizard.html" class="btn btn-primary btn-block btn-gold" id="btn-save-estimate">
+              <i data-lucide="file-plus"></i> Save Estimate & Start Planning
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOLUTIONS SECTION -->
+    <section class="solutions-section" id="solutions">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-badge">INDUSTRY SOLUTIONS</span>
+          <h2 class="section-title">Designed for Every Phase of the AEC Lifecycle</h2>
+          <p class="section-subtitle">Whether you manage residential developments, commercial high-rises, or custom architectural studios.</p>
+        </div>
+
+        <div class="solutions-tabs">
+          <div class="tab-controls">
+            <button class="tab-btn active" data-tab="sol-residential"><i data-lucide="home"></i> Residential Developers</button>
+            <button class="tab-btn" data-tab="sol-commercial"><i data-lucide="building"></i> Commercial Builders</button>
+            <button class="tab-btn" data-tab="sol-architects"><i data-lucide="compass"></i> Architects & Engineers</button>
+            <button class="tab-btn" data-tab="sol-gc"><i data-lucide="hard-hat"></i> General Contractors</button>
+          </div>
+
+          <div class="tab-contents">
+            <!-- Tab Content 1: Residential -->
+            <div class="tab-panel active" id="sol-residential">
+              <div class="solution-content-grid">
+                <div class="sol-text">
+                  <h3>Rapid Layout Generation for Master-Planned Communities</h3>
+                  <p>Generate dozens of floor plan variants tailored to specific lot dimensions, setback regulations, and solar orientations in minutes.</p>
+                  <ul class="sol-bullets">
+                    <li><i data-lucide="check"></i> 60% faster pre-construction phase</li>
+                    <li><i data-lucide="check"></i> Instant buyer customization wizard with live cost updating</li>
+                    <li><i data-lucide="check"></i> Automated grading and substructure volume estimation</li>
+                  </ul>
+                  <a href="/wizard.html" class="btn btn-outline"><i data-lucide="arrow-right"></i> Explore Residential Workflows</a>
+                </div>
+                <div class="sol-image">
+                  <img src="/assets/villa_render.jpg" alt="Residential Modern Villa Design" class="sol-img">
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab Content 2: Commercial -->
+            <div class="tab-panel" id="sol-commercial">
+              <div class="solution-content-grid">
+                <div class="sol-text">
+                  <h3>High-Rise & Mixed-Use Structural Optimization</h3>
+                  <p>Analyze column grid spacing, wind load deflection, and MEP vertical riser shafts in complex multi-story structures.</p>
+                  <ul class="sol-bullets">
+                    <li><i data-lucide="check"></i> Integrated Revit & IFC file sync</li>
+                    <li><i data-lucide="check"></i> Fire safety & egress route compliance verification</li>
+                    <li><i data-lucide="check"></i> Subcontractor package generation</li>
+                  </ul>
+                  <a href="/wizard.html" class="btn btn-outline"><i data-lucide="arrow-right"></i> Explore Commercial Workflows</a>
+                </div>
+                <div class="sol-image">
+                  <img src="/assets/floorplan_ai.jpg" alt="Commercial Tower Blueprint" class="sol-img">
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab Content 3: Architects & Engineers -->
+            <div class="tab-panel" id="sol-architects">
+              <div class="solution-content-grid">
+                <div class="sol-text">
+                  <h3>Generative BIM & Parametric Design Assistant</h3>
+                  <p>Empower your design studio with an AI co-pilot that converts client briefs directly into parametric 3D models with structural physics built-in.</p>
+                  <ul class="sol-bullets">
+                    <li><i data-lucide="check"></i> Export native DWG, IFC, and OBJ assets</li>
+                    <li><i data-lucide="check"></i> Real-time daylighting and thermal simulation</li>
+                    <li><i data-lucide="check"></i> Custom rule sets for local building codes</li>
+                  </ul>
+                  <a href="/wizard.html" class="btn btn-outline"><i data-lucide="arrow-right"></i> Explore Architectural Workflows</a>
+                </div>
+                <div class="sol-image">
+                  <img src="/assets/villa_render.jpg" alt="Architectural BIM Design" class="sol-img">
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab Content 4: General Contractors -->
+            <div class="tab-panel" id="sol-gc">
+              <div class="solution-content-grid">
+                <div class="sol-text">
+                  <h3>Zero-Error Takeoffs & Procurement Schedules</h3>
+                  <p>Eliminate costly change orders. BuildWise AI audits BIM drawings against field reality to detect clash points before construction begins.</p>
+                  <ul class="sol-bullets">
+                    <li><i data-lucide="check"></i> 99.4% takeoff quantity accuracy</li>
+                    <li><i data-lucide="check"></i> Supply chain lead time risk warnings</li>
+                    <li><i data-lucide="check"></i> Daily site progress photo-to-BIM alignment</li>
+                  </ul>
+                  <a href="/wizard.html" class="btn btn-outline"><i data-lucide="arrow-right"></i> Explore Contractor Workflows</a>
+                </div>
+                <div class="sol-image">
+                  <img src="/assets/floorplan_ai.jpg" alt="Contractor Procurement Blueprint" class="sol-img">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS & REVIEWS SECTION -->
+    <section class="testimonials-section">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-badge">CLIENT SUCCESS</span>
+          <h2 class="section-title">Trusted by Industry Leaders</h2>
+        </div>
+
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <div class="quote-stars">★★★★★</div>
+            <p class="quote-text">"BuildWise AI cut our pre-construction floor plan iteration time from 3 weeks down to less than 48 hours. The AI material optimization saved us over $140,000 in foundation concrete alone on our last mixed-use development."</p>
+            <div class="author-info">
+              <div class="author-avatar">MS</div>
+              <div>
+                <strong class="author-name">Marcus Sterling</strong>
+                <span class="author-role">VP of Pre-Construction, Sterling Development Group</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="quote-stars">★★★★★</div>
+            <p class="quote-text">"The structural load physics audit caught a critical cantilever stress concentration during early schematic design that would have required a major retrofit later. It's like having a senior principal engineer co-pilot every project."</p>
+            <div class="author-info">
+              <div class="author-avatar">EV</div>
+              <div>
+                <strong class="author-name">Elena Vance, PE</strong>
+                <span class="author-role">Lead Structural Engineer, Apex Engineering Consultants</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA BANNER (REPLACED WITH SINGLE START PLANNING CTA) -->
+    <section class="final-cta-section">
+      <div class="container">
+        <div class="cta-box">
+          <div class="cta-content text-center">
+            <h2 class="cta-title">Ready to Plan Your Next Project?</h2>
+            <p class="cta-subtitle">Begin your AI-powered smart construction journey. Define your plot details, building parameters, and room requirements in minutes.</p>
+            <div class="cta-buttons">
+              <a href="/wizard.html" class="btn btn-primary btn-large btn-gold-shimmer">
+                <span>Start Planning</span>
+                <i data-lucide="arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="/index.html" class="brand-logo">
+            <div class="logo-text">
+              <span class="brand-name">BuildWise</span>
+              <span class="brand-ai-badge">AI</span>
+            </div>
+          </a>
+          <p class="footer-desc">Enterprise-grade AI-powered Smart Construction Planning platform. Plan smarter, optimize costs, and build better.</p>
+          <div class="system-status">
+            <span class="status-dot green"></span>
+            <span>All Systems Operational (API Latency: 14ms)</span>
+          </div>
+        </div>
+
+        <div class="footer-links-column">
+          <h4>Platform</h4>
+          <a href="#features">Generative Floor Plans</a>
+          <a href="#estimator">Cost & Material Estimator</a>
+          <a href="#dashboard-preview">Interactive App</a>
+          <a href="#features">LEED Carbon Analytics</a>
+          <a href="#features">Structural Physics Audit</a>
+        </div>
+
+        <div class="footer-links-column">
+          <h4>Solutions</h4>
+          <a href="#solutions">Residential Developers</a>
+          <a href="#solutions">Commercial High-Rise</a>
+          <a href="#solutions">Architects & BIM Studios</a>
+          <a href="#solutions">General Contractors</a>
+        </div>
+
+        <div class="footer-links-column">
+          <h4>Company</h4>
+          <a href="#">About BuildWise</a>
+          <a href="#">Careers <span class="hiring-chip">Hiring</span></a>
+          <a href="#">Press & Media</a>
+          <a href="#">Privacy & Security</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 BuildWise AI Technologies Inc. All rights reserved.</p>
+        <p class="footer-disclaimer-text">* Disclaimer: Planning estimates and AI generated models are for pre-construction planning only and do not replace certified engineering drawings.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- INTERACTIVE MODAL: SIGN IN / ENTERPRISE SSO MODAL -->
+  <div class="modal-overlay" id="modal-auth" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Sign In to BuildWise AI</h3>
+        <button class="modal-close" onclick="closeSignInModal()"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="sso-buttons">
+          <button type="button" class="btn btn-sso" data-auth-provider="sso"><i data-lucide="shield"></i> Continue with Enterprise Single Sign-On (SSO)</button>
+          <button type="button" class="btn btn-sso" data-auth-provider="github"><i data-lucide="github"></i> Continue with GitHub</button>
+        </div>
+        <div class="auth-divider"><span>OR EMAIL</span></div>
+        <form id="auth-sign-in-form">
+          <div class="form-group">
+            <label>Work Email</label>
+            <input type="email" required class="input-text" placeholder="name@company.com">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" required class="input-text" placeholder="••••••••">
+          </div>
+          <button class="btn btn-primary btn-block btn-gold">Sign In</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Entry Script -->
+</body>
+</html>

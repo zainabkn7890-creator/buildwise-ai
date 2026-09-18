@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Creation Wizard | BuildWise AI</title>
+  <meta name="description" content="Enterprise Smart Construction Setup Wizard. Configure project details, plot dimensions, building layouts, room allocations, and budget preferences.">
+  
+  <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- CSS Styles -->
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/wizard.css">
+</head>
+<body class="theme-forest-dark wizard-page-body">
+
+  <!-- Background Architectural Grid Overlay -->
+  <div class="architectural-grid-bg">
+    <div class="grid-pattern"></div>
+    <div class="grid-vignette"></div>
+  </div>
+
+  <!-- Wizard Top Header Bar -->
+  <header class="wizard-header">
+    <div class="container wizard-nav-container">
+      <a href="/index.html" class="brand-logo" aria-label="BuildWise AI Home">
+        <div class="logo-mark">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#wiz-logo-grad)" stroke="#D4AF37" stroke-width="1.5"/>
+            <path d="M8 22L16 10L24 22H8Z" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 10V22" stroke="#4ADE80" stroke-width="1.5" stroke-dasharray="2 2"/>
+            <circle cx="16" cy="10" r="2.5" fill="#F3D375"/>
+            <defs>
+              <linearGradient id="wiz-logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#082218"/>
+                <stop offset="1" stop-color="#123D2A"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="brand-name">BuildWise</span>
+          <span class="brand-ai-badge">AI</span>
+        </div>
+      </a>
+
+      <!-- Wizard Header Title -->
+      <div class="wizard-title-badge">
+        <i data-lucide="sparkles" class="text-gold"></i>
+        <span>Enterprise Project Wizard</span>
+      </div>
+
+      <!-- Currency & Header Actions -->
+      <div class="wizard-header-actions">
+        <!-- Currency Selector Pill -->
+        <div class="currency-selector-pill" title="Select Project Currency">
+          <span class="curr-pill-label"><i data-lucide="coins"></i> Currency:</span>
+          <button class="curr-btn active" id="btn-curr-inr" onclick="setProjectCurrency('INR')">₹ INR</button>
+          <button class="curr-btn" id="btn-curr-usd" onclick="setProjectCurrency('USD')">$ USD</button>
+        </div>
+
+        <a href="/index.html" class="btn btn-xs btn-outline btn-cancel-setup"><i data-lucide="x"></i> Cancel</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Wizard Container -->
+  <main class="wizard-main-container">
+    <div class="container">
+      
+      <!-- REDESIGNED STEPPER PROGRESS INDICATOR CARD -->
+      <div class="wizard-progress-card">
+        <div class="stepper-track-container">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progress-bar-fill" style="width: 16.66%;"></div>
+          </div>
+
+          <div class="stepper-nodes-row">
+            <!-- Step 1 Node -->
+            <div class="step-node active" id="step-node-1" onclick="jumpToStep(1)" tabindex="0" role="button" aria-label="Step 1: Basic Information">
+              <div class="node-circle">
+                <span class="node-num">1</span>
+                <i data-lucide="check" class="node-check-icon"></i>
+              </div>
+              <span class="node-label">Basic Info</span>
+            </div>
+
+            <!-- Step 2 Node -->
+            <div class="step-node" id="step-node-2" onclick="jumpToStep(2)" tabindex="0" role="button" aria-label="Step 2: Plot Details">
+              <div class="node-circle">
+                <span class="node-num">2</span>
+                <i data-lucide="check" class="node-check-icon"></i>
+              </div>
+              <span class="node-label">Plot Details</span>
+            </div>
+
+            <!-- Step 3 Node -->
+            <div class="step-node" id="step-node-3" onclick="jumpToStep(3)" tabindex="0" role="button" aria-label="Step 3: Building Configuration">
+              <div class="node-circle">
+                <span class="node-num">3</span>
+                <i data-lucide="check" class="node-check-icon"></i>
+              </div>
+              <span class="node-label">Configuration</span>
+            </div>
+
+            <!-- Step 4 Node -->
+            <div class="step-node" id="step-node-4" onclick="jumpToStep(4)" tabindex="0" role="button" aria-label="Step 4: Room Requirements">
+              <div class="node-circle">
+                <span class="node-num">4</span>
+                <i data-lucide="check" class="node-check-icon"></i>
+              </div>
+              <span class="node-label">Rooms</span>
+            </div>
+
+            <!-- Step 5 Node -->
+            <div class="step-node" id="step-node-5" onclick="jumpToStep(5)" tabindex="0" role="button" aria-label="Step 5: Preferences">
+              <div class="node-circle">
+                <span class="node-num">5</span>
+                <i data-lucide="check" class="node-check-icon"></i>
+              </div>
+              <span class="node-label">Preferences</span>
+            </div>
+
+            <!-- Step 6 Node -->
+            <div class="step-node" id="step-node-6" onclick="jumpToStep(6)" tabindex="0" role="button" aria-label="Step 6: Review & Summary">
+              <div class="node-circle">
+                <span class="node-num">6</span>
+                <i data-lucide="check" class="node-check-icon"></i>
+              </div>
+              <span class="node-label">Review</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WIZARD STEP PANELS CONTAINER -->
+      <div class="wizard-panel-card">
+
+        <!-- STEP 1: BASIC INFORMATION -->
+        <div class="wizard-step-content active" id="wizard-step-1">
+          <div class="step-header">
+            <span class="step-badge">STEP 1 OF 6</span>
+            <h2>Basic Project Information</h2>
+            <p>Define the identity and primary construction scope for your project.</p>
+          </div>
+
+          <div class="step-form-grid">
+            <div class="form-group full-width">
+              <label for="input-proj-name" class="form-label">Project Name <span class="required-asterisk">*</span></label>
+              <input type="text" id="input-proj-name" class="input-text-unified" placeholder="e.g. Horizon Heights Modern Residence" value="Horizon Heights Residence">
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label">Building Category <span class="required-asterisk">*</span></label>
+              <div class="option-cards-grid three-cols" id="building-type-grid">
+                <div class="option-card active" data-val="residential">
+                  <div class="option-icon"><i data-lucide="home"></i></div>
+                  <div class="option-title">Residential</div>
+                  <div class="option-desc">Villas, apartments & housing</div>
+                </div>
+
+                <div class="option-card" data-val="commercial">
+                  <div class="option-icon"><i data-lucide="building-2"></i></div>
+                  <div class="option-title">Commercial</div>
+                  <div class="option-desc">Offices, retail & hospitality</div>
+                </div>
+
+                <div class="option-card" data-val="mixed">
+                  <div class="option-icon"><i data-lucide="layers"></i></div>
+                  <div class="option-title">Mixed Use</div>
+                  <div class="option-desc">Commercial + residential combined</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group full-width" id="commercial-subtype-section" style="display:none;">
+              <label class="form-label">Commercial Type <span class="required-asterisk">*</span></label>
+              <div class="option-cards-grid" id="commercial-subtype-grid">
+                <div class="option-card active" data-val="Office Building">
+                  <div class="option-icon"><i data-lucide="briefcase"></i></div>
+                  <div class="option-title">Office Building</div>
+                </div>
+                <div class="option-card" data-val="Retail Shop">
+                  <div class="option-icon"><i data-lucide="shopping-bag"></i></div>
+                  <div class="option-title">Retail Shop</div>
+                </div>
+                <div class="option-card" data-val="Shopping Mall">
+                  <div class="option-icon"><i data-lucide="store"></i></div>
+                  <div class="option-title">Shopping Mall</div>
+                </div>
+                <div class="option-card" data-val="Supermarket">
+                  <div class="option-icon"><i data-lucide="shopping-cart"></i></div>
+                  <div class="option-title">Supermarket</div>
+                </div>
+                <div class="option-card" data-val="Restaurant">
+                  <div class="option-icon"><i data-lucide="utensils"></i></div>
+                  <div class="option-title">Restaurant / Cafe</div>
+                </div>
+                <div class="option-card" data-val="Hotel">
+                  <div class="option-icon"><i data-lucide="bed"></i></div>
+                  <div class="option-title">Hotel</div>
+                </div>
+                <div class="option-card" data-val="Hospital">
+                  <div class="option-icon"><i data-lucide="heart-pulse"></i></div>
+                  <div class="option-title">Hospital / Clinic</div>
+                </div>
+                <div class="option-card" data-val="School">
+                  <div class="option-icon"><i data-lucide="graduation-cap"></i></div>
+                  <div class="option-title">School / College</div>
+                </div>
+                <div class="option-card" data-val="Warehouse">
+                  <div class="option-icon"><i data-lucide="package"></i></div>
+                  <div class="option-title">Warehouse</div>
+                </div>
+                <div class="option-card" data-val="Factory">
+                  <div class="option-icon"><i data-lucide="factory"></i></div>
+                  <div class="option-title">Factory / Industrial</div>
+                </div>
+                <div class="option-card" data-val="Showroom">
+                  <div class="option-icon"><i data-lucide="eye"></i></div>
+                  <div class="option-title">Showroom</div>
+                </div>
+                <div class="option-card" data-val="Cinema">
+                  <div class="option-icon"><i data-lucide="film"></i></div>
+                  <div class="option-title">Cinema / Multiplex</div>
+                </div>
+                <div class="option-card" data-val="Co-working">
+                  <div class="option-icon"><i data-lucide="users"></i></div>
+                  <div class="option-title">Co-working Space</div>
+                </div>
+                <div class="option-card" data-val="Other">
+                  <div class="option-icon"><i data-lucide="more-horizontal"></i></div>
+                  <div class="option-title">Other</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group full-width" id="residential-subtype-section">
+              <label class="form-label">Residential Type <span class="required-asterisk">*</span></label>
+              <div class="option-cards-grid three-cols" id="residential-subtype-grid">
+                <div class="option-card active" data-val="Single-Family Villa">
+                  <div class="option-icon"><i data-lucide="home"></i></div>
+                  <div class="option-title">Single-Family Villa</div>
+                  <div class="option-desc">Luxury standalone private residence</div>
+                </div>
+                <div class="option-card" data-val="Multi-Family Subdivision">
+                  <div class="option-icon"><i data-lucide="building"></i></div>
+                  <div class="option-title">Multi-Family Subdivision</div>
+                  <div class="option-desc">Duplex, triplex or cluster housing</div>
+                </div>
+                <div class="option-card" data-val="Apartment Complex">
+                  <div class="option-icon"><i data-lucide="building"></i></div>
+                  <div class="option-title">Apartment Complex</div>
+                  <div class="option-desc">Multi-unit residential block</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label">Construction Scope <span class="required-asterisk">*</span></label>
+              <div class="option-cards-grid three-cols" id="construction-type-grid">
+                <div class="option-card active" data-val="new">
+                  <div class="option-icon"><i data-lucide="sparkles"></i></div>
+                  <div class="option-title">New Construction</div>
+                  <div class="option-desc">Ground-up greenfield development</div>
+                </div>
+
+                <div class="option-card" data-val="renovation">
+                  <div class="option-icon"><i data-lucide="hammer"></i></div>
+                  <div class="option-title">Renovation / Addition</div>
+                  <div class="option-desc">Structural expansion of existing building</div>
+                </div>
+
+                <div class="option-card" data-val="shell">
+                  <div class="option-icon"><i data-lucide="frame"></i></div>
+                  <div class="option-title">Core & Shell</div>
+                  <div class="option-desc">Base structure without interior fit-out</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: PROJECT LOCATION -->
+        <div class="wizard-step-content" id="wizard-step-2">
+          <div class="step-header">
+            <span class="step-badge">STEP 2 OF 6</span>
+            <h2>Project Location</h2>
+            <p>Search and pin your construction site on the map. All location details are set automatically.</p>
+          </div>
+
+          <div class="step-form-grid">
+
+            <!-- ── LOCATION SEARCH BAR ── -->
+            <div class="form-group full-width">
+              <div class="loc-search-wrapper">
+                <span class="loc-search-icon"><i data-lucide="search"></i></span>
+                <input
+                  type="text"
+                  id="map-address-search"
+                  class="loc-search-input"
+                  placeholder="Search project location, address or city..."
+                  autocomplete="off"
+                  spellcheck="false"
+                  aria-label="Search project location"
+                >
+                <button class="loc-locate-btn" id="btn-current-location" title="Use current location">
+                  <i data-lucide="navigation"></i>
+                </button>
+              </div>
+              <!-- Google Places Autocomplete Dropdown (populated dynamically) -->
+              <div class="loc-autocomplete-dropdown" id="loc-autocomplete-dropdown"></div>
+            </div>
+
+            <!-- ── QUICK SUGGESTION CHIPS ── -->
+            <div class="form-group full-width">
+              <div class="loc-chips-row">
+                <span class="loc-chips-label"><i data-lucide="zap"></i> Quick select:</span>
+                <button class="loc-chip" data-query="Hyderabad, Telangana, India">Hyderabad</button>
+                <button class="loc-chip" data-query="Mumbai, Maharashtra, India">Mumbai</button>
+                <button class="loc-chip" data-query="Delhi, India">Delhi</button>
+                <button class="loc-chip" data-query="Bengaluru, Karnataka, India">Bengaluru</button>
+                <button class="loc-chip" data-query="Chennai, Tamil Nadu, India">Chennai</button>
+                <button class="loc-chip" data-query="Kolkata, West Bengal, India">Kolkata</button>
+              </div>
+            </div>
+
+            <!-- ── MAP CONTAINER ── -->
+            <div class="form-group full-width">
+              <div class="loc-map-shell" id="loc-map-shell">
+
+                <!-- Map View Toggle Controls -->
+                <div class="loc-map-controls-top">
+                  <div class="loc-map-type-toggle" id="loc-map-type-toggle">
+                    <button class="loc-map-type-btn active" data-type="roadmap" id="btn-map-roadmap">
+                      <i data-lucide="map"></i> Map
+                    </button>
+                    <button class="loc-map-type-btn" data-type="satellite" id="btn-map-satellite">
+                      <i data-lucide="satellite"></i> Satellite
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Professional Placeholder (shown only when no API key) -->
+                <div class="loc-no-api-notice hidden" id="loc-no-api-notice">
+                  <div class="loc-no-api-inner">
+                    <div class="loc-no-api-icon">
+                      <i data-lucide="map-pin"></i>
+                    </div>
+                    <p class="loc-no-api-title">Interactive map available with Google Maps API key.</p>
+                    <p class="loc-no-api-sub">Use the search bar or quick-select chips above to set your project location.</p>
+                  </div>
+                </div>
+
+                <!-- The actual map div (Google Maps or Leaflet renders here) -->
+                <div id="map-container" class="loc-map-canvas"></div>
+
+                <!-- Zoom Controls Overlay -->
+                <div class="loc-zoom-controls">
+                  <button class="loc-zoom-btn" id="btn-zoom-in" title="Zoom in"><i data-lucide="plus"></i></button>
+                  <button class="loc-zoom-btn" id="btn-zoom-out" title="Zoom out"><i data-lucide="minus"></i></button>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- ── SELECTED LOCATION SUMMARY CARD ── -->
+            <div class="form-group full-width">
+              <div class="loc-summary-card" id="loc-summary-card">
+                <div class="loc-summary-header">
+                  <div class="loc-summary-pin-icon"><i data-lucide="map-pin"></i></div>
+                  <div>
+                    <div class="loc-summary-title" id="loc-summary-title">Project Location</div>
+                    <div class="loc-summary-status" id="loc-summary-status">Search or select a location above</div>
+                  </div>
+                  <div class="loc-summary-badge" id="loc-summary-badge" style="display:none;">
+                    <i data-lucide="check-circle"></i> Location Set
+                  </div>
+                </div>
+
+                <div class="loc-summary-body" id="loc-summary-body" style="display:none;">
+                  <div class="loc-summary-grid">
+                    <div class="loc-field-block">
+                      <span class="loc-field-label">Locality</span>
+                      <span class="loc-field-value" id="sum-locality">—</span>
+                    </div>
+                    <div class="loc-field-block">
+                      <span class="loc-field-label">City</span>
+                      <span class="loc-field-value" id="sum-city">—</span>
+                    </div>
+                    <div class="loc-field-block">
+      <span class="loc-field-label">State</span>
+                      <span class="loc-field-value" id="sum-state">—</span>
+                    </div>
+                    <div class="loc-field-block">
+                      <span class="loc-field-label">Country</span>
+                      <span class="loc-field-value" id="sum-country">—</span>
+                    </div>
+                    <div class="loc-field-block">
+                      <span class="loc-field-label">PIN / Postal Code</span>
+                      <span class="loc-field-value" id="sum-postal">—</span>
+                    </div>
+                    <div class="loc-field-block loc-field-block--wide">
+                      <span class="loc-field-label">Formatted Address</span>
+                      <span class="loc-field-value loc-field-address" id="sum-address">—</span>
+                    </div>
+                  </div>
+
+                  <!-- Advanced Details Toggle -->
+                  <div class="loc-advanced-toggle">
+                    <button class="loc-advanced-btn" id="btn-advanced-details" onclick="toggleAdvancedDetails()">
+                      <i data-lucide="chevron-down" id="icon-advanced-chevron"></i>
+                      View Advanced Details
+                    </button>
+                  </div>
+                  <div class="loc-advanced-panel" id="loc-advanced-panel">
+                    <div class="loc-advanced-grid">
+                      <div class="loc-adv-field">
+                        <span class="loc-adv-label">Latitude</span>
+                        <span class="loc-adv-value font-mono" id="sum-lat">—</span>
+                      </div>
+                      <div class="loc-adv-field">
+                        <span class="loc-adv-label">Longitude</span>
+                        <span class="loc-adv-value font-mono" id="sum-lng">—</span>
+                      </div>
+                      <div class="loc-adv-field">
+                        <span class="loc-adv-label">Timezone</span>
+                        <span class="loc-adv-value font-mono" id="sum-timezone">—</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hidden synchronized fields (read by wizard.js for data compile) -->
+            <input type="hidden" id="input-city" value="">
+            <input type="hidden" id="input-state" value="">
+            <input type="hidden" id="input-country" value="">
+            <input type="hidden" id="input-postal" value="">
+            <input type="hidden" id="input-lat" value="">
+            <input type="hidden" id="input-long" value="">
+
+            <!-- ── FOUNDATION RECOMMENDATION CARD ── -->
+            <div class="form-group full-width">
+              <div class="loc-foundation-card" id="loc-foundation-card" style="display:none;">
+                <div class="loc-foundation-header">
+                  <div class="loc-foundation-icon"><i data-lucide="building-2"></i></div>
+                  <div>
+                    <div class="loc-foundation-title">Foundation Recommendation</div>
+                    <div class="loc-foundation-subtitle" id="foundation-subtitle">BuildWise AI site analysis</div>
+                  </div>
+                  <div class="loc-foundation-badge" id="foundation-badge">
+                    <i data-lucide="sparkles"></i> AI Analysis
+                  </div>
+                </div>
+                <div class="loc-foundation-body" id="foundation-body">
+                  <div class="loc-foundation-result" id="foundation-result">
+                    <span class="foundation-recommendation-text" id="foundation-text">—</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dimensions Card -->
+            <div class="form-group full-width">
+              <div class="dimensions-card">
+                <div class="dim-header">
+                  <span class="dim-title"><i data-lucide="ruler"></i> Plot Dimensions &amp; Area Calculation</span>
+                  <div class="unit-toggle-box">
+                    <span class="unit-label">Unit System:</span>
+                    <button class="unit-btn active" id="unit-sqft" onclick="setPlotUnit('sqft')">sq ft</button>
+                    <button class="unit-btn" id="unit-sqm" onclick="setPlotUnit('sqm')">sq m</button>
+                  </div>
+                </div>
+
+                <div class="dim-inputs-row">
+                  <div class="dim-field">
+                    <label for="input-plot-length">Plot Length</label>
+                    <div class="input-unit-wrap">
+                      <input type="number" id="input-plot-length" class="input-text-unified" value="75" min="10" max="500">
+                      <span class="unit-tag" id="tag-length-unit">ft</span>
+                    </div>
+                  </div>
+
+                  <div class="dim-operator">×</div>
+
+                  <div class="dim-field">
+                    <label for="input-plot-width">Plot Width</label>
+                    <div class="input-unit-wrap">
+                      <input type="number" id="input-plot-width" class="input-text-unified" value="60" min="10" max="500">
+                      <span class="unit-tag" id="tag-width-unit">ft</span>
+                    </div>
+                  </div>
+
+                  <div class="dim-operator">=</div>
+
+                  <div class="dim-field area-field">
+                    <label>Calculated Plot Area</label>
+                    <div class="area-output" id="output-plot-area">4,500 sq ft</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Road Facing Direction -->
+            <div class="form-group full-width">
+              <label class="form-label">Road-Facing Direction (Orientation / Vastu)</label>
+              <div class="direction-grid" id="direction-grid">
+                <button class="dir-btn" data-dir="North"><i data-lucide="arrow-up"></i> North</button>
+                <button class="dir-btn active" data-dir="East"><i data-lucide="arrow-right"></i> East</button>
+                <button class="dir-btn" data-dir="South"><i data-lucide="arrow-down"></i> South</button>
+                <button class="dir-btn" data-dir="West"><i data-lucide="arrow-left"></i> West</button>
+                <button class="dir-btn" data-dir="North-East"><i data-lucide="arrow-up-right"></i> North-East</button>
+                <button class="dir-btn" data-dir="North-West"><i data-lucide="arrow-up-left"></i> North-West</button>
+                <button class="dir-btn" data-dir="South-East"><i data-lucide="arrow-down-right"></i> South-East</button>
+                <button class="dir-btn" data-dir="South-West"><i data-lucide="arrow-down-left"></i> South-West</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: BUILDING CONFIGURATION -->
+        <div class="wizard-step-content" id="wizard-step-3">
+          <div class="step-header">
+            <span class="step-badge">STEP 3 OF 6</span>
+            <h2>Building Configuration & Layout</h2>
+            <p>Select floor count, basement requirements, parking, and staircase options.</p>
+          </div>
+
+          <div class="step-form-grid">
+            <div class="form-group">
+              <label for="select-floors" class="form-label">Number of Above-Ground Floors</label>
+              <div class="select-wrapper">
+                <select id="select-floors" class="input-select-unified">
+                  <option value="1">Single Story (Ground Floor Only)</option>
+                  <option value="2" selected>2 Stories (Ground + 1 Floor)</option>
+                  <option value="3">3 Stories (Ground + 2 Floors)</option>
+                  <option value="4">4 Stories (Ground + 3 Floors)</option>
+                  <option value="5">5+ Multi-Story Structure</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-chevron"></i>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="select-basement" class="form-label">Basement Requirement</label>
+              <div class="select-wrapper">
+                <select id="select-basement" class="input-select-unified">
+                  <option value="none">No Basement</option>
+                  <option value="single" selected>Single Level Basement (Storage / Utility)</option>
+                  <option value="double">Double Level Basement (Subterranean Parking)</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-chevron"></i>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="select-parking" class="form-label">Parking Configuration</label>
+              <div class="select-wrapper">
+                <select id="select-parking" class="input-select-unified">
+                  <option value="garage-2" selected>Covered 2-Car Garage</option>
+                  <option value="garage-4">Covered 4-Car Executive Garage</option>
+                  <option value="carport">Open Driveway Carport</option>
+                  <option value="underground">Underground Mechanical Stack Parking</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-chevron"></i>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="select-staircase" class="form-label">Primary Staircase Style</label>
+              <div class="select-wrapper">
+                <select id="select-staircase" class="input-select-unified">
+                  <option value="doglegged" selected>Dog-Legged Reinforced Staircase</option>
+                  <option value="spiral">Curved / Architectural Spiral</option>
+                  <option value="cantilever">Floating Cantilevered Tread</option>
+                  <option value="straight">Straight Flight Timber</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-chevron"></i>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label">Architectural Amenities</label>
+              <div class="amenities-grid">
+                <label class="checkbox-card">
+                  <input type="checkbox" id="chk-balcony" checked>
+                  <div class="chk-box-content">
+                    <i data-lucide="panel-top"></i>
+                    <div>
+                      <strong>Balconies & Terraces</strong>
+                      <span>Private outdoor floor decks</span>
+                    </div>
+                  </div>
+                </label>
+
+                <label class="checkbox-card">
+                  <input type="checkbox" id="chk-garden" checked>
+                  <div class="chk-box-content">
+                    <i data-lucide="flower-2"></i>
+                    <div>
+                      <strong>Garden / Landscaping</strong>
+                      <span>Front lawn & courtyard atrium</span>
+                    </div>
+                  </div>
+                </label>
+
+                <label class="checkbox-card">
+                  <input type="checkbox" id="chk-elevator" checked>
+                  <div class="chk-box-content">
+                    <i data-lucide="arrow-up-down"></i>
+                    <div>
+                      <strong>Elevator / Passenger Lift</strong>
+                      <span>Hydraulic lift shaft</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4: ROOM REQUIREMENTS -->
+        <div class="wizard-step-content" id="wizard-step-4">
+          <div class="step-header">
+            <span class="step-badge">STEP 4 OF 6</span>
+            <h2>Room Requirements & Area Allocation</h2>
+            <p id="room-step-description">Set room counts and preferred floor area for all room categories.</p>
+          </div>
+
+          <div class="rooms-container-grid" id="rooms-list">
+            <!-- Room cards will be dynamically generated based on building type -->
+          </div>
+        </div>
+
+        <!-- STEP 5: PREFERENCES & BUDGET -->
+        <div class="wizard-step-content" id="wizard-step-5">
+          <div class="step-header">
+            <span class="step-badge">STEP 5 OF 6</span>
+            <h2>Budget & Preferences</h2>
+            <p>Set construction budget, material finish quality, and green building options.</p>
+          </div>
+
+          <div class="step-form-grid">
+            <div class="form-group full-width">
+              <div class="budget-card">
+                <div class="control-header">
+                  <label for="slider-budget">Target Construction Budget (<span id="curr-label-tag">INR ₹</span>)</label>
+                  <span class="val-display gold-text font-mono" id="val-budget-display">₹1,25,00,000</span>
+                </div>
+                <input type="range" id="slider-budget" min="2500000" max="100000000" step="500000" value="12500000" class="range-slider">
+                <div class="slider-ticks" id="slider-ticks-container" style="position:relative;height:1.2em;margin-top:4px;">
+                  <span style="position:absolute;left:0%;transform:translateX(0);font-size:0.7rem;color:#9db3a7;">₹25L</span>
+                  <span style="position:absolute;left:7.7%;transform:translateX(-50%);font-size:0.7rem;color:#9db3a7;">₹1Cr</span>
+                  <span style="position:absolute;left:28.2%;transform:translateX(-50%);font-size:0.7rem;color:#9db3a7;">₹3Cr</span>
+                  <span style="position:absolute;left:48.7%;transform:translateX(-50%);font-size:0.7rem;color:#9db3a7;">₹5Cr</span>
+                  <span style="position:absolute;right:0%;transform:translateX(0);font-size:0.7rem;color:#9db3a7;">₹10Cr</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label">Material Finish & Specification Quality</label>
+              <div class="option-cards-grid three-cols" id="material-quality-grid">
+                <div class="option-card" data-val="standard">
+                  <div class="option-icon"><i data-lucide="box"></i></div>
+                  <div class="option-title">Standard Commercial</div>
+                  <div class="option-desc">Durable code-standard materials & fixtures</div>
+                </div>
+
+                <div class="option-card active" data-val="premium">
+                  <div class="option-icon"><i data-lucide="award"></i></div>
+                  <div class="option-title">Premium Designer</div>
+                  <div class="option-desc">Hardwood, Italian porcelain & Low-E glass</div>
+                </div>
+
+                <div class="option-card" data-val="luxury">
+                  <div class="option-icon"><i data-lucide="gem"></i></div>
+                  <div class="option-title">Ultra-Luxury Custom</div>
+                  <div class="option-desc">Imported marble, smart automation & titanium trim</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="select-sustainability" class="form-label">Sustainability & Carbon Priority</label>
+              <div class="select-wrapper">
+                <select id="select-sustainability" class="input-select-unified">
+                  <option value="leed-gold" selected>LEED Gold Standard (Recommended)</option>
+                  <option value="net-zero">Net-Zero Carbon (LEED Platinum)</option>
+                  <option value="standard">Standard Building Code Minimum</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-chevron"></i>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="select-energy" class="form-label">Energy Efficiency Standards</label>
+              <div class="select-wrapper">
+                <select id="select-energy" class="input-select-unified">
+                  <option value="solar-hvac" selected>Solar Photovoltaic + Smart HVAC Zoning</option>
+                  <option value="passivhaus">Passivhaus Ultra-Low Energy Envelope</option>
+                  <option value="standard">Standard Energy Star Appliances</option>
+                </select>
+                <i data-lucide="chevron-down" class="select-chevron"></i>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label">Accessibility Requirements</label>
+              <div class="amenities-grid">
+                <label class="checkbox-card">
+                  <input type="checkbox" id="chk-ada-ramps" checked>
+                  <div class="chk-box-content">
+                    <i data-lucide="accessibility"></i>
+                    <div>
+                      <strong>ADA Ramps & Entries</strong>
+                      <span>Zero-step exterior access</span>
+                    </div>
+                  </div>
+                </label>
+
+                <label class="checkbox-card">
+                  <input type="checkbox" id="chk-wide-doors" checked>
+                  <div class="chk-box-content">
+                    <i data-lucide="door-open"></i>
+                    <div>
+                      <strong>Wide Doorways (≥36 inches)</strong>
+                      <span>Clear passage for wheelchair access</span>
+                    </div>
+                  </div>
+                </label>
+
+                <label class="checkbox-card">
+                  <input type="checkbox" id="chk-accessible-bath">
+                  <div class="chk-box-content">
+                    <i data-lucide="shield-check"></i>
+                    <div>
+                      <strong>Accessible Bathrooms</strong>
+                      <span>Roll-in shower stall & grab bars</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 6: REVIEW & CONFIRMATION -->
+        <div class="wizard-step-content" id="wizard-step-6">
+          <div class="step-header">
+            <span class="step-badge">STEP 6 OF 6</span>
+            <h2>Review & Save Project Configuration</h2>
+            <p>Verify your parameters before entering the BuildWise AI Parametric Workspace.</p>
+          </div>
+
+          <div class="review-summary-grid">
+            <div class="review-card">
+              <div class="rev-card-header">
+                <h3><i data-lucide="folder" class="text-gold"></i> 1. Basic Information</h3>
+                <button class="btn-rev-edit" onclick="jumpToStep(1)"><i data-lucide="edit-2"></i> Edit</button>
+              </div>
+              <div class="rev-details-list">
+                <div class="rev-item"><span>Project Name:</span> <strong id="rev-proj-name">Horizon Heights Residence</strong></div>
+                <div class="rev-item"><span>Building Type:</span> <strong id="rev-building-type">Single-Family Villa</strong></div>
+                <div class="rev-item"><span>Construction Scope:</span> <strong id="rev-construction-type">New Construction</strong></div>
+              </div>
+            </div>
+
+            <div class="review-card">
+              <div class="rev-card-header">
+                <h3><i data-lucide="map-pin" class="text-gold"></i> 2. Plot Details</h3>
+                <button class="btn-rev-edit" onclick="jumpToStep(2)"><i data-lucide="edit-2"></i> Edit</button>
+              </div>
+              <div class="rev-details-list">
+                <div class="rev-item"><span>Location:</span> <strong id="rev-location">—</strong></div>
+                <div class="rev-item"><span>Full Address:</span> <strong id="rev-address" style="font-size:0.82rem; color:var(--wiz-text-2);">—</strong></div>
+                <div class="rev-item"><span>Dimensions:</span> <strong id="rev-dimensions">75 ft × 60 ft</strong></div>
+                <div class="rev-item"><span>Calculated Area:</span> <strong id="rev-area" class="text-gold">4,500 sq ft</strong></div>
+                <div class="rev-item"><span>Road Facing:</span> <strong id="rev-direction">East</strong></div>
+                <div class="rev-item"><span>Foundation:</span> <strong id="rev-foundation" class="text-gold">—</strong></div>
+              </div>
+            </div>
+
+            <div class="review-card">
+              <div class="rev-card-header">
+                <h3><i data-lucide="layers" class="text-gold"></i> 3. Configuration</h3>
+                <button class="btn-rev-edit" onclick="jumpToStep(3)"><i data-lucide="edit-2"></i> Edit</button>
+              </div>
+              <div class="rev-details-list">
+                <div class="rev-item"><span>Floors:</span> <strong id="rev-floors">2 Stories (Ground + 1)</strong></div>
+                <div class="rev-item"><span>Basement:</span> <strong id="rev-basement">Single Level Basement</strong></div>
+                <div class="rev-item"><span>Parking:</span> <strong id="rev-parking">Covered 2-Car Garage</strong></div>
+                <div class="rev-item"><span>Amenities:</span> <strong id="rev-amenities">Balcony, Garden, Elevator</strong></div>
+              </div>
+            </div>
+
+            <div class="review-card">
+              <div class="rev-card-header">
+                <h3><i data-lucide="grid" class="text-gold"></i> 4. Room Allocation</h3>
+                <button class="btn-rev-edit" onclick="jumpToStep(4)"><i data-lucide="edit-2"></i> Edit</button>
+              </div>
+              <div class="rev-details-list" id="rev-rooms-summary">
+                <div class="rev-item"><span>Total Rooms Specified:</span> <strong id="rev-total-rooms">13 Room Types Configured</strong></div>
+              </div>
+            </div>
+
+            <div class="review-card full-width">
+              <div class="rev-card-header">
+                <h3><i data-lucide="coins" class="text-gold"></i> 5. Preferences & Budget</h3>
+                <button class="btn-rev-edit" onclick="jumpToStep(5)"><i data-lucide="edit-2"></i> Edit</button>
+              </div>
+              <div class="rev-details-list two-cols">
+                <div class="rev-item"><span>Target Budget:</span> <strong id="rev-budget" class="text-gold">₹1,25,00,000 (INR)</strong></div>
+                <div class="rev-item"><span>Material Quality:</span> <strong id="rev-quality">Premium Designer</strong></div>
+                <div class="rev-item"><span>Sustainability:</span> <strong id="rev-sustainability">LEED Gold Standard</strong></div>
+                <div class="rev-item"><span>Energy Standard:</span> <strong id="rev-energy">Solar Photovoltaic + HVAC</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-disclaimer-box">
+            <i data-lucide="shield-check" class="text-gold"></i>
+            <div>
+              <strong>Ready for Workspace Compilation:</strong>
+              <p>Your project inputs will be compiled into the BuildWise AI Parametric Workspace engine. Floor plan generation will be performed inside the workspace.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- REDESIGNED BOTTOM NAVIGATION CONTROLS BAR -->
+      <div class="wizard-footer-bar">
+        <button class="btn btn-wizard-secondary" id="btn-wiz-prev" onclick="prevStep()" disabled>
+          <i data-lucide="arrow-left"></i> Previous Step
+        </button>
+
+        <div class="step-indicator-text" id="wiz-step-counter">
+          Step <span>1</span> of 6
+        </div>
+
+        <button class="btn btn-wizard-primary" id="btn-wiz-next" onclick="nextStep()">
+          <span>Next Step</span>
+          <i data-lucide="arrow-right"></i>
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- SAVING & GENERATING WORKSPACE MODAL -->
+  <div class="modal-overlay" id="modal-workspace-saving" aria-hidden="true">
+    <div class="modal-dialog text-center">
+      <div class="ai-loader-spinner"></div>
+      <h3 class="gold-text">Saving Project Configuration...</h3>
+      <p style="margin-top: 0.8rem; color: var(--text-muted);">Initializing BuildWise AI Workspace engine for <strong id="saving-proj-name" style="color:#fff;">Horizon Heights Residence</strong>.</p>
+    </div>
+  </div>
+
+  <!-- JS Entry Scripts -->
+  <script type="module" src="/wizard.js"></script>
+</body>
+</html>
